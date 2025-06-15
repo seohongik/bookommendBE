@@ -1,15 +1,15 @@
-package com.project.bookommendbe.account;
+package com.project.bookommendbe.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 @Data
 @Entity
-@EqualsAndHashCode
-@ToString
-@Accessors(chain = true)
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "book_isbn" }) })
+@ToString(exclude = {"id"})
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +27,7 @@ public class Book {
     @Column(length = 10000)
     private String  description;    // 책 설명
     private String category;       // 카테고리/장르
-    private int pageCount;     // 총 페이지 수
+    private String pageCount;     // 총 페이지 수
     private String language;       // 언어
 
     private String coverImageUrl;  // 책 표지 이미지 링크
@@ -35,8 +35,6 @@ public class Book {
     @Enumerated(EnumType.STRING)
     private BookCategory bookCategory;
 
-    @Enumerated(EnumType.STRING)
-    private BookSubCategory bookSubCategory;
 
     @Enumerated(EnumType.STRING)
     private BookType bookType;
@@ -44,6 +42,17 @@ public class Book {
     private String discount;
 
     private String splitTitle;
+
+    @OneToMany(mappedBy = "book")
+    private List<UserBook> userBooks;
+
+//    @ManyToOne
+//    @JoinColumn(name = "user_book_id")
+//    private UserBook userBook;
+
+
+
+
 
 
 }

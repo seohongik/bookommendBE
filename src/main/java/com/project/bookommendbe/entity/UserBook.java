@@ -1,4 +1,4 @@
-package com.project.bookommendbe.account;
+package com.project.bookommendbe.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,11 +8,7 @@ import java.time.LocalDate;
 
 @Entity
 @Data
-@EqualsAndHashCode
-@ToString
-@AllArgsConstructor
-@NoArgsConstructor
-@Accessors(chain = true)
+@ToString(exclude = {"id", "book","user"})
 public class UserBook {
 
     @Id
@@ -22,10 +18,13 @@ public class UserBook {
     private String bookIsbn;
 
     @ManyToOne
-    private User user;
+    @JoinColumn(name = "book_id")
+    private Book book;
 
     @ManyToOne
-    private Book book;
+    @JoinColumn(name = "user_id")
+    private User user;
+
 
     @Enumerated(EnumType.STRING)
     private ReadingStatus status; // 읽기 상태: TO_READ, READING, COMPLETED

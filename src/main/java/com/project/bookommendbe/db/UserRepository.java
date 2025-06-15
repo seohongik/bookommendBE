@@ -1,6 +1,7 @@
 package com.project.bookommendbe.db;
 
-import com.project.bookommendbe.account.User;
+import com.project.bookommendbe.entity.Book;
+import com.project.bookommendbe.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,4 +1,4 @@
-package com.project.bookommendbe.account;
+package com.project.bookommendbe.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,8 +9,6 @@ import java.time.LocalDate;
 
 @Entity
 @Data
-@EqualsAndHashCode
-@ToString
 public class ReadingRecord {
 
 
@@ -25,7 +23,7 @@ public class ReadingRecord {
     private User user;
 
     @ManyToOne
-    private Book book;
+    private UserBook userBook;
 
     private LocalDate date;         // 읽은 날짜
     private Integer pagesRead;      // 읽은 페이지 수

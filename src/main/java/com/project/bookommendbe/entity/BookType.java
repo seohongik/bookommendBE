@@ -1,4 +1,4 @@
-package com.project.bookommendbe.account;
+package com.project.bookommendbe.entity;
 
 import lombok.Getter;
 

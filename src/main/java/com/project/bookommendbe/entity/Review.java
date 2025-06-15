@@ -1,4 +1,4 @@
-package com.project.bookommendbe.account;
+package com.project.bookommendbe.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,8 +9,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@EqualsAndHashCode
-@ToString
 public class Review {
 
     @Id

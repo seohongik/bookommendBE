@@ -1,16 +1,20 @@
 package com.project.bookommendbe.transaction;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.project.bookommendbe.account.Book;
-import com.project.bookommendbe.account.User;
-import com.project.bookommendbe.account.UserBook;
+import com.project.bookommendbe.dto.UserBookReadVO;
+import com.project.bookommendbe.dto.UserBookSaveVO;
+import com.project.bookommendbe.dto.api.library.Doc;
+import com.project.bookommendbe.dto.api.library.Result;
+import com.project.bookommendbe.entity.Book;
+import com.project.bookommendbe.entity.BookCategory;
+import com.project.bookommendbe.entity.User;
+import com.project.bookommendbe.entity.UserBook;
 import com.project.bookommendbe.db.BookRepository;
 import com.project.bookommendbe.db.UserBookRepository;
 import com.project.bookommendbe.db.UserRepository;
 import com.project.bookommendbe.dto.BookVO;
-import com.project.bookommendbe.dto.ReviewVO;
-import com.project.bookommendbe.dto.api.Channel;
-import com.project.bookommendbe.dto.api.Item;
+import com.project.bookommendbe.dto.api.naver.Channel;
+import com.project.bookommendbe.dto.api.naver.Item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,6 +52,9 @@ public class UserBookController {
     @Value("${naver.secretId}")
     private String secretId;
 
+    @Value("${aladin.key}")
+    private String libraryKey;
+
     @Autowired
     public UserBookController(UserRepository userRepository, BookRepository bookRepository, UserBookRepository userBookRepository) {
         this.userRepository = userRepository;
@@ -62,11 +69,9 @@ public class UserBookController {
         String title  = paramMap.get("query");
         List<Book>  ownBookAfterSave=bookRepository.findBooksByTitleContaining(title);
 
-        log.error("ownBookAfterSave:{}",ownBookAfterSave);
-
         if(ownBookAfterSave!=null && !ownBookAfterSave.isEmpty()) {
             OwnSearchBook(showBooks, ownBookAfterSave);
-            log.error("beforeApi::::{}",showBooks);
+            log.info("beforeApi::::");
             return showBooks;
         }
 
@@ -86,15 +91,14 @@ public class UserBookController {
                 .path("/v1/search/book.json")
                 .queryParam("query",paramMap.get("query"))
                 .queryParam("start",paramMap.get("start"))
-                .queryParam("display",100)
+                .queryParam("display",10)
                 .build();
-        String uri = uriComponents.toUriString();
+        String uriNaver = uriComponents.toUriString();
 
         HttpEntity<Channel> requestEntity = new HttpEntity<>(headers);
 
-        ResponseEntity<Channel> response = restTemplate.exchange(uri, HttpMethod.GET, requestEntity, Channel.class);
+        ResponseEntity<Channel> response = restTemplate.exchange(uriNaver, HttpMethod.GET, requestEntity, Channel.class);
 
-        log.info("response:{}",response);
         if(response.getBody() != null) {
 
             for (Item item : response.getBody().getItems()) {
@@ -123,7 +127,7 @@ public class UserBookController {
 
         if(ownBookAfterSaveAfterApi!=null&& !ownBookAfterSaveAfterApi.isEmpty()) {
             OwnSearchBook(showBooks, ownBookAfterSaveAfterApi);
-            log.error("AfterApi::::{}",showBooks);
+            log.info("AfterApi::::");
         }
 
         return showBooks;
@@ -176,33 +180,100 @@ public class UserBookController {
 
     }
 
-    @GetMapping("/r1/bookTittle/{userId}")
-    public List<UserBook> getUserBook(@PathVariable Long userId) throws JsonProcessingException {
+    @GetMapping("/r1/userBook/{userId}")
+    public List<UserBookReadVO> getUserBook(@PathVariable long userId) throws JsonProcessingException, MalformedURLException {
 
+        RestTemplate restTemplate = new RestTemplate();
+        List<UserBookReadVO> userBookReadVOList = new ArrayList<>();
         // 내 책장에서 데이터 가져오기
-        Optional<User> user = userRepository.findById(userId);
-        if(user.isPresent()) {
-            UserBook userBook = userBookRepository.findByUser(user.get());
+        User user = userRepository.findUserById(userId);
+        List<UserBook> userBooks =userBookRepository.findUserBooksByUserId(userId);
 
-            List<UserBook> userBookList = new ArrayList<>();
-            userBookList.add(userBook);
+        //api 쏴서 책 장수 업데이트
+        String urlString = "http://www.aladin.co.kr";
+        URL url = new URL(urlString);
+        for (UserBook userBook : userBooks) {
+            Optional<Book> book =bookRepository.findBookByBookIsbn(userBook.getBookIsbn());
 
-            return new ArrayList<>(userBookList);
-        } else {
+            UriComponents uriComponents = UriComponentsBuilder.newInstance()
+                    .scheme(url.getProtocol())
+                    .host(url.getHost())
+                    .path("/ttb/api/ItemSearch.aspx")
+                    .queryParam("ttbkey", libraryKey)
+                    .queryParam("Query",book.get().getPublisher())
+                    .queryParam("QueryType","Publisher")
+                    .queryParam("start",1)
+                    .queryParam("MaxResults",10)
+                    .queryParam("output","JS")
+                    .queryParam("SearchTarget","Book")
+                    .build();
+            String uriLibrary = uriComponents.toUriString();
+            System.err.println(uriLibrary);
 
-            return new ArrayList<>();
+            Result response = restTemplate.getForObject(uriLibrary,Result.class);
+
+            log.error("uriLibrary::::{}",response);
+
+
+            if(response!=null&&response.getDocs() != null) {
+
+                for (Doc doc  :response.getDocs()) {
+
+                    if(doc.getPage()!=null) {
+                        book.ifPresent(value -> {
+                                    value.setPageCount(doc.getPage());
+                                    value.setCategory(doc.getSubject());
+                                    bookRepository.save(value);
+                                }
+                        );
+                    }
+                }
+            }
         }
+
+        for (UserBook userBook : userBooks) {
+            Optional<Book> book = bookRepository.findBookByBookIsbn(userBook.getBookIsbn());
+
+            log.error("userBook{}",userBook);
+            if(book.isPresent()) {
+                UserBookReadVO userBookReadVO = new UserBookReadVO();
+                userBookReadVO.setBookIsbn(userBook.getBookIsbn());
+                userBookReadVO.setTitle(book.get().getTitle());
+                userBookReadVO.setAuthor(book.get().getAuthor());
+                userBookReadVO.setPublisher(book.get().getPublisher());
+                userBookReadVO.setCoverImageUrl(book.get().getCoverImageUrl());
+                userBookReadVO.setPublishedDate(book.get().getPublishedDate());
+                userBookReadVO.setDescription(book.get().getDescription());
+                userBookReadVO.setBookId(book.get().getId());
+                userBookReadVO.setUserBookId(userBook.getId());
+                userBookReadVO.setUserId(userId);
+                userBookReadVOList.add(userBookReadVO);
+            }
+        }
+
+        return new ArrayList<>(userBookReadVOList);
+
     }
 
-    @PostMapping("/c1/review")
-    public void insertTransactionBy( @RequestBody ReviewVO request)  {
+    @PostMapping("/c1/userBook")
+    public void insertUserBookBy( @RequestBody UserBookSaveVO request)  {
 
         System.err.println(request);
-        //UserDTO foundUserById=transactionService.findUserBy(reqDTO.getUserId());
 
-        //if(foundUserById.getId() == reqDTO.getUserId()) {
-        //}
+        Optional<User> user = userRepository.findById(request.getUserId());
 
+        if(user.isPresent()) {
+            Optional<Book> book =bookRepository.findBookByBookIsbn(request.getBookIsbn());
+            log.error("장바구니 북 :::{}",book.isPresent());
+            boolean isOwnBook=userBookRepository.existsByBook(book.get());
+
+            if(!isOwnBook) {
+                UserBook userBook = new UserBook();
+                userBook.setBook(book.get());
+                userBook.setUser(user.get());
+                userBook.setBookIsbn(book.get().getBookIsbn());
+                userBookRepository.save(userBook);
+            }
+        }
     }
-
 }

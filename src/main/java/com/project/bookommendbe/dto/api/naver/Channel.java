@@ -1,4 +1,4 @@
-package com.project.bookommendbe.dto.api;
+package com.project.bookommendbe.dto.api.naver;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

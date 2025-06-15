@@ -1,6 +1,6 @@
 package com.project.bookommendbe.dto;
 
-import com.project.bookommendMC.entity.account.RatingEnum;
+import com.project.bookommendbe.entity.RatingEnum;
 import lombok.*;
 import lombok.experimental.Accessors;
 

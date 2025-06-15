@@ -1,4 +1,4 @@
-package com.project.bookommendbe.account;
+package com.project.bookommendbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;

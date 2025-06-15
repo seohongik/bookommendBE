@@ -1,4 +1,4 @@
-package com.project.bookommendbe.account;
+package com.project.bookommendbe.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,10 +19,8 @@ month	VARCHAR(7)	필수	예산 설정 월 (YYYY-MM)	2025-06
 amount_limit	DECIMAL(10,2)	필수	월간 예산 금액	300000.00
 created_at	DATETIME	필수	예산 등록 시간	2025-05-31 12:00:00*/
 
-@Data
-@EqualsAndHashCode
-@ToString
 @Entity
+@Data
 public class Goals {
     @Id
     @GeneratedValue

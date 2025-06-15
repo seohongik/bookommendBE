@@ -1,4 +1,4 @@
-package com.project.bookommendbe.account;
+package com.project.bookommendbe.entity;
 
 
 import jakarta.persistence.*;
@@ -7,11 +7,11 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.time.LocalDate;
+import java.util.List;
 
-@Data
-@EqualsAndHashCode
-@ToString
 @Entity
+@Data
+@ToString(exclude = {"id", "userBook"})
 public class User {
 
     @Id
@@ -28,6 +28,8 @@ public class User {
 
     private LocalDate createdAt;
 
-    @ManyToOne
-    private Goals goals;
+    @OneToMany(mappedBy = "user")
+    private List<UserBook> userBook;
+
+
 }
