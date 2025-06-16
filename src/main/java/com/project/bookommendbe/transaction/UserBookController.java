@@ -1,18 +1,11 @@
 package com.project.bookommendbe.transaction;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.project.bookommendbe.dto.UserBookReadVO;
-import com.project.bookommendbe.dto.UserBookSaveVO;
+import com.project.bookommendbe.db.*;
+import com.project.bookommendbe.dto.*;
 import com.project.bookommendbe.dto.api.library.Doc;
 import com.project.bookommendbe.dto.api.library.Result;
-import com.project.bookommendbe.entity.Book;
-import com.project.bookommendbe.entity.BookCategory;
-import com.project.bookommendbe.entity.User;
-import com.project.bookommendbe.entity.UserBook;
-import com.project.bookommendbe.db.BookRepository;
-import com.project.bookommendbe.db.UserBookRepository;
-import com.project.bookommendbe.db.UserRepository;
-import com.project.bookommendbe.dto.BookVO;
+import com.project.bookommendbe.entity.*;
 import com.project.bookommendbe.dto.api.naver.Channel;
 import com.project.bookommendbe.dto.api.naver.Item;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +22,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /*
@@ -42,9 +37,11 @@ import java.util.*;
 @RestController
 public class UserBookController {
 
-    private UserRepository userRepository;
-    private BookRepository bookRepository;
-    private UserBookRepository userBookRepository;
+    private final UserRepository userRepository;
+    private final BookRepository bookRepository;
+    private final UserBookRepository userBookRepository;
+    private final ReviewRepository reviewRepository;
+    private final ReadingRecordRepository readingRecordRepository;
 
     @Value("${naver.clientId}")
     private String clientId;
@@ -52,14 +49,15 @@ public class UserBookController {
     @Value("${naver.secretId}")
     private String secretId;
 
-    @Value("${aladin.key}")
-    private String libraryKey;
+
 
     @Autowired
-    public UserBookController(UserRepository userRepository, BookRepository bookRepository, UserBookRepository userBookRepository) {
+    public UserBookController(UserRepository userRepository, BookRepository bookRepository, UserBookRepository userBookRepository, ReviewRepository reviewRepository, ReadingRecordRepository readingRecordRepository) {
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
         this.userBookRepository= userBookRepository;
+        this.reviewRepository = reviewRepository;
+        this.readingRecordRepository = readingRecordRepository;
 
     }
 
@@ -171,14 +169,10 @@ public class UserBookController {
             char chosung = (char)(keywordUniBase / 28 / 21);
             char jungsung = (char)(keywordUniBase / 28 % 21);
             char jongsung = (char)(keywordUniBase % 28);
-
             result += chosungs[chosung] + jungsungs[jungsung] + jongsungs[jongsung];
-
         }
 
         System.out.println(result);
-
-
         return result;
 
     }
@@ -207,7 +201,7 @@ public class UserBookController {
                 userBookReadVO.setUserBookId(userBook.getId());
                 userBookReadVO.setUserId(userId);
                 userBookReadVO.setPageCount(userBook.getPageCount());
-                userBookReadVO.setPageAmountCount(userBook.getPageAmountCount());
+                userBookReadVO.setFromPage(userBook.getFromPage());
 
                 userBookReadVOList.add(userBookReadVO);
 
@@ -245,7 +239,56 @@ public class UserBookController {
 
         if(userBook.isPresent()) {
             int pageCount = Integer.parseInt(request.get("pageCount"));
+            int fromPage = Integer.parseInt(request.get("fromPage"));
             userBook.get().setPageCount(pageCount);
+            userBook.get().setFromPage(fromPage);
+            userBookRepository.save(userBook.get());
+        }
+    }
+
+    @PostMapping("/c1/userBookRecordAndReview")
+    public void saveUserBookRecordAndReviewBy(@RequestBody SavingRecordAndReviewVO saveRequest) {
+
+        log.info("saveRequest::::::{}",saveRequest);
+
+        Optional<UserBook> userBook = userBookRepository.findUserBookByUserIdAndId(saveRequest.getUserId(), saveRequest.getUserBookId());
+
+        if(userBook.isPresent()) {
+            Review review = new Review();
+            ReadingRecord readingRecord = new ReadingRecord();
+
+
+            review.setCreatedAt(LocalDateTime.now());
+            review.setRating(RatingEnum.fromValue(saveRequest.getRating()));
+            review.setUser(userBook.get().getUser());
+            review.setBook(userBook.get().getBook());
+            reviewRepository.save(review);
+
+            readingRecord.setUserBook(userBook.get());
+            readingRecord.setUser(userBook.get().getUser());
+
+            readingRecord.setBookIsbn(saveRequest.getRecord().getBookIsbn());
+            readingRecord.setToPage(saveRequest.getRecord().getToPage());
+            readingRecord.setFromPage(saveRequest.getRecord().getFromPage());
+            readingRecord.setDate(saveRequest.getRecord().getDate());
+            readingRecord.setComment(saveRequest.getRecord().getComment());
+            readingRecord.setOpinion(saveRequest.getRecord().getOpinion());
+            readingRecord.setTime(saveRequest.getRecord().getTime());
+            readingRecord.setPercent(saveRequest.getRecord().getPercent());
+            readingRecord.setReadAmountCount(saveRequest.getRecord().getReadAmountCount());
+
+            if(saveRequest.getRecord().getFromPage()==0) {
+                readingRecord.setStatus(String.valueOf(ReadingStatus.TO_READ));
+            }else  if(saveRequest.getRecord().getFromPage()>0) {
+                readingRecord.setStatus(String.valueOf(ReadingStatus.READING));
+            }
+            if (saveRequest.getRecord().getFromPage()== saveRequest.getRecord().getToPage()) {
+                readingRecord.setStatus(String.valueOf(ReadingStatus.COMPLETED));
+            }
+
+            readingRecordRepository.save(readingRecord);
+
+            userBook.get().setFromPage(saveRequest.getRecord().getFromPage());
             userBookRepository.save(userBook.get());
         }
     }

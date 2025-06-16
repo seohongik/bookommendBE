@@ -16,7 +16,6 @@ public class ReadingRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     private String bookIsbn;
 
     @ManyToOne
@@ -25,17 +24,20 @@ public class ReadingRecord {
     @ManyToOne
     private UserBook userBook;
 
-    private LocalDate date;         // 읽은 날짜
-    private Integer pagesRead;      // 읽은 페이지 수
-    private Integer fromPage;       // 시작 페이지 (optional)
-    private Integer toPage;         // 마지막 페이지 (optional)
+    private String date;         // 읽은 날짜
+    private int readAmountCount;      // 읽은 페이지 수
+    private int fromPage;       // 시작 페이지 (optional)
+    private int toPage;         // 마지막 페이지 (optional)
 
-    private Integer percent;
-    private String memo;            // 간단한 메모 (optional)
+    private int betweenPage; // 전 대비 읽은 페이지
 
-    private String location;
-    private String withWho;
-    private String reason;
+    private double percent;
+
+    private String opinion;
     private String comment;
+
+    private String status;
+
+    private String time;
 
 }

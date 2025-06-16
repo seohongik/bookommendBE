@@ -37,5 +37,8 @@ public class UserBook {
     private int pageCount;     // 총 페이지 수
 
     @ColumnDefault("1")
-    private int pageAmountCount;     // 개별 페이지 수
+    private int fromPage;     // 개별 페이지 수
+
+    private int pagePrice;
+
 }

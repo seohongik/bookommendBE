@@ -22,5 +22,5 @@ public class UserBookReadVO {
     private String description;
     private long bookId;
     private int pageCount;
-    private int pageAmountCount;
+    private int fromPage;
 }
