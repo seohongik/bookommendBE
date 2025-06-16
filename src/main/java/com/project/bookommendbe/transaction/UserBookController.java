@@ -67,73 +67,75 @@ public class UserBookController {
     public List<BookVO> requestUserBook(@RequestParam  Map<String, String> paramMap) throws MalformedURLException {
         List<BookVO> showBooks = new ArrayList<>();
         String title  = paramMap.get("query");
-        List<Book>  ownBookAfterSave=bookRepository.findBooksByTitleContaining(title);
 
-        if(ownBookAfterSave!=null && !ownBookAfterSave.isEmpty()) {
-            OwnSearchBook(showBooks, ownBookAfterSave);
-            log.info("beforeApi::::");
-            return showBooks;
-        }
+        if(title!=null&& !title.isEmpty()) {
+
+            List<Book> ownBookAfterSave = bookRepository.findBooksByTitleContaining(title);
+
+            if (ownBookAfterSave != null && !ownBookAfterSave.isEmpty()) {
+                ownSearchBook(showBooks, ownBookAfterSave);
+                log.info("beforeApi::::");
+                return showBooks;
+            }
 
 
-        RestTemplate restTemplate = new RestTemplate();
+            RestTemplate restTemplate = new RestTemplate();
+            String urlString = "https://openapi.naver.com";
+            URL url = new URL(urlString);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("X-Naver-Client-Id", clientId);
+            headers.add("X-Naver-Client-Secret", secretId);
 
+            UriComponents uriComponents = UriComponentsBuilder.newInstance()
+                    .scheme(url.getProtocol())
+                    .host(url.getHost())
+                    .path("/v1/search/book.json")
+                    .queryParam("query", paramMap.get("query"))
+                    .queryParam("start", paramMap.get("start"))
+                    .queryParam("display", 10)
+                    .build();
+            String uriNaver = uriComponents.toUriString();
 
-        String urlString = "https://openapi.naver.com";
-        URL url = new URL(urlString);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Naver-Client-Id",clientId);
-        headers.add("X-Naver-Client-Secret",secretId);
+            HttpEntity<Channel> requestEntity = new HttpEntity<>(headers);
 
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(url.getProtocol())
-                .host(url.getHost())
-                .path("/v1/search/book.json")
-                .queryParam("query",paramMap.get("query"))
-                .queryParam("start",paramMap.get("start"))
-                .queryParam("display",10)
-                .build();
-        String uriNaver = uriComponents.toUriString();
+            ResponseEntity<Channel> response = restTemplate.exchange(uriNaver, HttpMethod.GET, requestEntity, Channel.class);
 
-        HttpEntity<Channel> requestEntity = new HttpEntity<>(headers);
+            if (response.getBody() != null) {
 
-        ResponseEntity<Channel> response = restTemplate.exchange(uriNaver, HttpMethod.GET, requestEntity, Channel.class);
+                for (Item item : response.getBody().getItems()) {
 
-        if(response.getBody() != null) {
+                    Optional<Book> isOwnIsbnBook = ownData(item.getIsbn());
 
-            for (Item item : response.getBody().getItems()) {
+                    if (isOwnIsbnBook.isEmpty() || !isOwnIsbnBook.get().getBookIsbn().equals(item.getIsbn())) {
 
-                Optional<Book> isOwnIsbnBook = ownData(item.getIsbn());
-
-                if (isOwnIsbnBook.isEmpty() || !isOwnIsbnBook.get().getBookIsbn().equals(item.getIsbn()) ) {
-
-                    Book saveBook = new Book();
-                    saveBook.setCoverImageUrl(item.getImage());
-                    saveBook.setAuthor(item.getAuthor());
-                    saveBook.setBookIsbn(item.getIsbn());
-                    saveBook.setTitle(item.getTitle());
-                    saveBook.setDescription(item.getDescription());
-                    saveBook.setPublisher(item.getPublisher());
-                    saveBook.setSplitTitle(split(item.getTitle()));
-                    saveBook.setPublishedDate(item.getPubdate());
-                    saveBook.setPublishedDate(item.getPubdate());
-                    bookRepository.save(saveBook);
+                        Book saveBook = new Book();
+                        saveBook.setCoverImageUrl(item.getImage());
+                        saveBook.setAuthor(item.getAuthor());
+                        saveBook.setBookIsbn(item.getIsbn());
+                        saveBook.setTitle(item.getTitle());
+                        saveBook.setDescription(item.getDescription());
+                        saveBook.setPublisher(item.getPublisher());
+                        saveBook.setSplitTitle(split(item.getTitle()));
+                        saveBook.setPublishedDate(item.getPubdate());
+                        saveBook.setPublishedDate(item.getPubdate());
+                        bookRepository.save(saveBook);
+                    }
                 }
             }
-        }
 
-        String ownTitleAfterApi  = split(paramMap.get("query"));
-        List<Book>  ownBookAfterSaveAfterApi=bookRepository.findBooksBySplitTitleContaining(ownTitleAfterApi);
+            String ownTitleAfterApi = split(paramMap.get("query"));
+            List<Book> ownBookAfterSaveAfterApi = bookRepository.findBooksBySplitTitleContaining(ownTitleAfterApi);
 
-        if(ownBookAfterSaveAfterApi!=null&& !ownBookAfterSaveAfterApi.isEmpty()) {
-            OwnSearchBook(showBooks, ownBookAfterSaveAfterApi);
-            log.info("AfterApi::::");
+            if (ownBookAfterSaveAfterApi != null && !ownBookAfterSaveAfterApi.isEmpty()) {
+                ownSearchBook(showBooks, ownBookAfterSaveAfterApi);
+                log.info("AfterApi::::");
+            }
         }
 
         return showBooks;
     }
 
-    private void OwnSearchBook(List<BookVO> showBooks, List<Book> ownBookAfterSaveAfterApi) {
+    private void ownSearchBook(List<BookVO> showBooks, List<Book> ownBookAfterSaveAfterApi) {
         for (Book item : ownBookAfterSaveAfterApi) {
             BookVO showBook = new BookVO();
             showBook.setId(item.getId());
@@ -146,6 +148,7 @@ public class UserBookController {
             showBook.setPublishedDate(item.getPublishedDate());
             showBooks.add(showBook);
         }
+
     }
 
     //가지고 있는지 확인
@@ -183,53 +186,9 @@ public class UserBookController {
     @GetMapping("/r1/userBook/{userId}")
     public List<UserBookReadVO> getUserBook(@PathVariable long userId) throws JsonProcessingException, MalformedURLException {
 
-        RestTemplate restTemplate = new RestTemplate();
         List<UserBookReadVO> userBookReadVOList = new ArrayList<>();
         // 내 책장에서 데이터 가져오기
-        User user = userRepository.findUserById(userId);
         List<UserBook> userBooks =userBookRepository.findUserBooksByUserId(userId);
-
-        //api 쏴서 책 장수 업데이트
-        String urlString = "http://www.aladin.co.kr";
-        URL url = new URL(urlString);
-        for (UserBook userBook : userBooks) {
-            Optional<Book> book =bookRepository.findBookByBookIsbn(userBook.getBookIsbn());
-
-            UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                    .scheme(url.getProtocol())
-                    .host(url.getHost())
-                    .path("/ttb/api/ItemSearch.aspx")
-                    .queryParam("ttbkey", libraryKey)
-                    .queryParam("Query",book.get().getPublisher())
-                    .queryParam("QueryType","Publisher")
-                    .queryParam("start",1)
-                    .queryParam("MaxResults",10)
-                    .queryParam("output","JS")
-                    .queryParam("SearchTarget","Book")
-                    .build();
-            String uriLibrary = uriComponents.toUriString();
-            System.err.println(uriLibrary);
-
-            Result response = restTemplate.getForObject(uriLibrary,Result.class);
-
-            log.error("uriLibrary::::{}",response);
-
-
-            if(response!=null&&response.getDocs() != null) {
-
-                for (Doc doc  :response.getDocs()) {
-
-                    if(doc.getPage()!=null) {
-                        book.ifPresent(value -> {
-                                    value.setPageCount(doc.getPage());
-                                    value.setCategory(doc.getSubject());
-                                    bookRepository.save(value);
-                                }
-                        );
-                    }
-                }
-            }
-        }
 
         for (UserBook userBook : userBooks) {
             Optional<Book> book = bookRepository.findBookByBookIsbn(userBook.getBookIsbn());
@@ -247,7 +206,11 @@ public class UserBookController {
                 userBookReadVO.setBookId(book.get().getId());
                 userBookReadVO.setUserBookId(userBook.getId());
                 userBookReadVO.setUserId(userId);
+                userBookReadVO.setPageCount(userBook.getPageCount());
+                userBookReadVO.setPageAmountCount(userBook.getPageAmountCount());
+
                 userBookReadVOList.add(userBookReadVO);
+
             }
         }
 
@@ -274,6 +237,16 @@ public class UserBookController {
                 userBook.setBookIsbn(book.get().getBookIsbn());
                 userBookRepository.save(userBook);
             }
+        }
+    }
+    @PutMapping("/u1/userBookPageCount/{userId}/{userBookId}")
+    public void updateUserBookPageCountBy(@PathVariable Long userId, @PathVariable Long userBookId, @RequestBody Map<String,String> request) {
+        Optional<UserBook> userBook=userBookRepository.findUserBookByUserIdAndId(userId,userBookId);
+
+        if(userBook.isPresent()) {
+            int pageCount = Integer.parseInt(request.get("pageCount"));
+            userBook.get().setPageCount(pageCount);
+            userBookRepository.save(userBook.get());
         }
     }
 }

@@ -3,6 +3,7 @@ package com.project.bookommendbe.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.List;
 
@@ -27,7 +28,9 @@ public class Book {
     @Column(length = 10000)
     private String  description;    // 책 설명
     private String category;       // 카테고리/장르
-    private String pageCount;     // 총 페이지 수
+
+
+
     private String language;       // 언어
 
     private String coverImageUrl;  // 책 표지 이미지 링크

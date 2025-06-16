@@ -3,6 +3,7 @@ package com.project.bookommendbe.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 
@@ -29,6 +30,12 @@ public class UserBook {
     @Enumerated(EnumType.STRING)
     private ReadingStatus status; // 읽기 상태: TO_READ, READING, COMPLETED
 
-    private LocalDate startedAt;
-    private LocalDate finishedAt;
+    private String startedAt;
+    private String  finishedAt;
+
+    @ColumnDefault("0")
+    private int pageCount;     // 총 페이지 수
+
+    @ColumnDefault("1")
+    private int pageAmountCount;     // 개별 페이지 수
 }
