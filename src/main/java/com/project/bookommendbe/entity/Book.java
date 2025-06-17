@@ -27,7 +27,6 @@ public class Book {
 
     @Column(length = 10000)
     private String  description;    // 책 설명
-    private String category;       // 카테고리/장르
 
 
 
