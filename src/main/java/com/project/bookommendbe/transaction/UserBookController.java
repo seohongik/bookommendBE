@@ -259,6 +259,7 @@ public class UserBookController {
 
 
             review.setCreatedAt(LocalDateTime.now());
+            review.setReviewDate(saveRequest.getRecord().getDate());
             review.setRating(RatingEnum.fromValue(saveRequest.getRating()));
             review.setUser(userBook.get().getUser());
             review.setBook(userBook.get().getBook());

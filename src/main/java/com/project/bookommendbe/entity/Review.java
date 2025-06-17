@@ -22,7 +22,7 @@ public class Review {
     private String content;
 
     private LocalDateTime createdAt;
-
+    private String reviewDate;
     @Enumerated(EnumType.STRING)
     private RatingEnum rating;
 }
