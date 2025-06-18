@@ -56,8 +56,8 @@ public class MainController {
             timelineVO.setBookIsbn(readingRecord.getBookIsbn());
             timelineVO.setBetweenPage(readingRecord.getBetweenPage());
             timelineVO.setStatus(ReadingStatus.valueOf(readingRecord.getStatus()));
-            timelineVO.setFromPage(readingRecord.getFromPage()+"pg"+"\uD83D\uDCD6");
-            timelineVO.setToPage(readingRecord.getToPage()+"pg"+"\uD83D\uDCD6");
+            timelineVO.setFromPage(readingRecord.getFromPage()+"\uD83D\uDCD6");
+            timelineVO.setToPage(readingRecord.getToPage()+"\uD83D\uDCD6");
             timelineVO.setReadAmountCount(readingRecord.getReadAmountCount());
             timelineVO.setTime(readingRecord.getTime());
 
