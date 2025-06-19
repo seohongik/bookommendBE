@@ -20,6 +20,7 @@ public class ReviewVO {
     private Long bookId;
     private String bookTitle;
 
+
     private String content;
     private LocalDateTime createdAt;
     private RatingEnum rating;

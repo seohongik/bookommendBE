@@ -103,7 +103,7 @@ public class Doc {
     private String cipYn;
 
     @JsonProperty("SUBJECT")
-    private String subject;
+    private int subject;
 
     @JsonProperty("BIB_YN")
     private String bibYn;

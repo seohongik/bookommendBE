@@ -2,8 +2,11 @@ package com.project.bookommendbe.dto.api.naver;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.project.bookommendbe.entity.BookCategory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 
 @Data
@@ -27,4 +30,6 @@ public class Item {
     private String description; // 책 소개
     @JsonProperty
     private String  pubdate; // 출간일
+
+    private int category;
 }
