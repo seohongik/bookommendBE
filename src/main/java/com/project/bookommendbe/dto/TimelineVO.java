@@ -24,4 +24,6 @@ public class TimelineVO {
     private String rating;
     private String title;
     private String author;
+    private LocalDateTime createdAt;
+
 }
