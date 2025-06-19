@@ -317,6 +317,7 @@ public class UserBookController {
             }
 
             readingRecordRepository.save(readingRecord);
+
             userBook.get().setFromPage(saveRequest.getRecord().getFromPage());
             userBookRepository.save(userBook.get());
         }

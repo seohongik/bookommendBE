@@ -22,77 +22,67 @@ public class MainController {
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final ReadingRecordRepository readingRecordRepository;
-    private final UserBookRepository userBookRepository;
+    private final BookRepository bookRepository;
 
     @Autowired
-    public MainController(UserRepository userRepository, ReviewRepository reviewRepository, ReadingRecordRepository readingRecordRepository, UserBookRepository userBookRepository) {
+    public MainController(UserRepository userRepository, ReviewRepository reviewRepository, ReadingRecordRepository readingRecordRepository, BookRepository bookRepository) {
         this.userRepository = userRepository;
         this.reviewRepository = reviewRepository;
         this.readingRecordRepository = readingRecordRepository;
-        this.userBookRepository = userBookRepository;
-
+        this.bookRepository = bookRepository;
     }
 
     @GetMapping("/r1/timeline")
     public List<TimelineVO> timeline(@RequestParam Map<String, String> pramMap) {
 
         System.out.println(pramMap);
-
-        long userId = Long.parseLong(pramMap.get("userId"));
+        String userId = (String) pramMap.get("userId");
         String date = pramMap.get("date");
 
 
-        User user = userRepository.findUserById(userId);
-
-
+        User user = userRepository.findUserById(Long.parseLong(userId));
         List<ReadingRecord> readingRecords =readingRecordRepository.findReadingRecordsByUserAndDate(user,date);
         List<Review> reviews =reviewRepository.findReviewsByUserAndReviewDate(user, date);
+
 
         List<TimelineVO> timelines = new ArrayList<>();
 
         for (ReadingRecord readingRecord : readingRecords) {
+            TimelineVO timelineVO = new TimelineVO();
+            timelineVO.setDate(readingRecord.getDate());
+            timelineVO.setOpinion(new String(Character.toChars(0x1F913))+readingRecord.getOpinion());
+            timelineVO.setComment(new String(Character.toChars(0x1F914))+readingRecord.getComment());
+            timelineVO.setPercent(readingRecord.getPercent()+new String(Character.toChars(0x1F4C8)));
+            timelineVO.setBookIsbn(readingRecord.getBookIsbn());
+            timelineVO.setBetweenPage(readingRecord.getBetweenPage());
+            timelineVO.setStatus(ReadingStatus.valueOf(readingRecord.getStatus()));
+            timelineVO.setFromPage(readingRecord.getFromPage()+"\uD83D\uDCD6");
+            timelineVO.setToPage(readingRecord.getToPage()+"\uD83D\uDCD6");
+            timelineVO.setReadAmountCount(readingRecord.getReadAmountCount());
+            timelineVO.setTime(readingRecord.getTime());
 
-            UserBook userBook=userBookRepository.findUserBookByUserIdAndBookIsbn(userId,readingRecord.getBookIsbn());
+            Optional<Book> book = bookRepository.findBookByBookIsbn(readingRecord.getBookIsbn());
 
-            if(userBook.getBook().getBookIsbn().equals(readingRecord.getBookIsbn())) {
-
-                TimelineVO timelineVO = new TimelineVO();
-
-                timelineVO.setTitle(userBook.getBook().getTitle());
-                timelineVO.setAuthor(userBook.getBook().getAuthor());
-                timelineVO.setDate(readingRecord.getDate());
-                timelineVO.setOpinion(new String(Character.toChars(0x1F913)) + readingRecord.getOpinion());
-                timelineVO.setComment(new String(Character.toChars(0x1F914)) + readingRecord.getComment());
-                timelineVO.setPercent(readingRecord.getPercent() + new String(Character.toChars(0x1F4C8)));
-                timelineVO.setBookIsbn(readingRecord.getBookIsbn());
-                timelineVO.setBetweenPage(readingRecord.getBetweenPage());
-                timelineVO.setStatus(ReadingStatus.valueOf(readingRecord.getStatus()));
-                timelineVO.setFromPage(readingRecord.getFromPage() + "\uD83D\uDCD6");
-                timelineVO.setToPage(readingRecord.getToPage() + "\uD83D\uDCD6");
-                timelineVO.setReadAmountCount(readingRecord.getReadAmountCount());
-                timelineVO.setTime(readingRecord.getTime());
-                timelines.add(timelineVO);
+            if(book.isPresent()) {
+                timelineVO.setTitle(book.get().getTitle());
+                timelineVO.setAuthor(book.get().getAuthor());
             }
-        }
-
-        for (TimelineVO timelineVO : timelines) {
 
             for (Review review : reviews) {
+                if(readingRecord.getId().equals(review.getId())) {
 
-                if (review.getBook().getBookIsbn().equals(timelineVO.getBookIsbn())) {
-
-                    timelineVO.setCreatedAt(review.getCreatedAt());
-                    if (review.getRating().equals(RatingEnum.ONE)) {
-                        timelineVO.setRating("나의 별 " + "\u2B50");
-                    } else if (review.getRating().equals(RatingEnum.TWO)) {
-                        timelineVO.setRating("나의 별 " + "\u2B50" + "\u2B50");
-                    } else if (review.getRating().equals(RatingEnum.THREE)) {
-                        timelineVO.setRating("나의 별 " + "\u2B50" + "\u2B50" + "\u2B50");
-                    } else if (review.getRating().equals(RatingEnum.FOUR)) {
-                        timelineVO.setRating("나의 별 " + "\u2B50" + "\u2B50" + "\u2B50" + "\u2B50");
-                    } else if (review.getRating().equals(RatingEnum.FIVE)) {
-                        timelineVO.setRating("나의 별 " + "\u2B50" + "\u2B50" + "\u2B50" + "\u2B50" + "\u2B50");
+                    if(review.getRating().equals(RatingEnum.ONE)){
+                        timelineVO.setRating("나의 별 "+"\u2B50");
+                    }else if(review.getRating().equals(RatingEnum.TWO)){
+                        timelineVO.setRating("나의 별 "+"\u2B50"+"\u2B50");
+                    }else if(review.getRating().equals(RatingEnum.THREE)){
+                        timelineVO.setRating("나의 별 "+"\u2B50"+"\u2B50"+"\u2B50");
+                    }else if(review.getRating().equals(RatingEnum.FOUR)){
+                        timelineVO.setRating("나의 별 "+"\u2B50"+"\u2B50"+"\u2B50"+"\u2B50");
+                    }else if(review.getRating().equals(RatingEnum.FIVE)){
+                        timelineVO.setRating("나의 별 "+"\u2B50"+"\u2B50"+"\u2B50"+"\u2B50"+"\u2B50");
                     }
+                    timelines.add(timelineVO);
                 }
             }
         }
