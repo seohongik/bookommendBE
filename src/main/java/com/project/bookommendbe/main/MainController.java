@@ -1,20 +1,27 @@
 package com.project.bookommendbe.main;
 
 import com.project.bookommendbe.db.*;
+import com.project.bookommendbe.dto.LoginVO;
 import com.project.bookommendbe.dto.TimelineVO;
+import com.project.bookommendbe.dto.UserVO;
 import com.project.bookommendbe.entity.*;
+import com.project.bookommendbe.util.UserSession;
+import jakarta.validation.Valid;
+import jakarta.xml.bind.DatatypeConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @Slf4j
@@ -24,13 +31,15 @@ public class MainController {
     private final ReviewRepository reviewRepository;
     private final ReadingRecordRepository readingRecordRepository;
     private final UserBookRepository userBookRepository;
+    private final UserSession userSession;
 
     @Autowired
-    public MainController(UserRepository userRepository, ReviewRepository reviewRepository, ReadingRecordRepository readingRecordRepository, UserBookRepository userBookRepository) {
+    public MainController(UserRepository userRepository, ReviewRepository reviewRepository, ReadingRecordRepository readingRecordRepository, UserBookRepository userBookRepository, UserSession userSession) {
         this.userRepository = userRepository;
         this.reviewRepository = reviewRepository;
         this.readingRecordRepository = readingRecordRepository;
         this.userBookRepository = userBookRepository;
+        this.userSession = userSession;
     }
 
     @GetMapping("/r1/timeline")
@@ -97,6 +106,81 @@ public class MainController {
         }
         log.info("timeline :::: {}",timelines);
         return timelines;
+    }
+
+    @PostMapping("/c1/user")
+    public ResponseEntity user( @Valid @RequestBody UserVO userVO, BindingResult bindingResult) throws NoSuchAlgorithmException {
+
+        if(bindingResult.hasErrors()){
+            StringBuilder sb = new StringBuilder();
+
+            bindingResult.getAllErrors().forEach(objectError -> {
+                FieldError field = (FieldError) objectError;
+                String msg = objectError.getDefaultMessage();
+                System.out.println("field : "+field.getField());
+                System.out.println(msg);
+
+                sb.append("field  :" +field.getField());
+                sb.append("\n");
+                sb.append("message :"+msg);
+            });
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+        }
+
+        User user = new User();
+        user.setUsername(userVO.getUsername());
+        user.setPassword(encodingInformation(userVO.getPassword()));
+        user.setEmail(userVO.getEmail());
+        user.setGender(userVO.getGender());
+        user.setDateOfBirth(userVO.getDateOfBirth());
+        user.setConfirmPassword(encodingInformation(userVO.getConfirmPassword()));
+        user.setPhoneNumber(encodingInformation(String.valueOf(userVO.getPhoneNumber())));
+        user.setSignUpId(userVO.getSignUpId());
+        user.setPhoneNumberTypical(userVO.getPhoneNumber());
+
+        userRepository.save(user);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    }
+
+    @GetMapping("/r1/login")
+    public ResponseEntity login(@Valid @ModelAttribute LoginVO loginVO, BindingResult bindingResult) throws NoSuchAlgorithmException {
+
+        log.info("login :::: {}",loginVO);
+        StringBuilder sb = new StringBuilder();
+        if(bindingResult.hasErrors()){
+
+            bindingResult.getAllErrors().forEach(objectError -> {
+                FieldError field = (FieldError) objectError;
+                String msg = objectError.getDefaultMessage();
+                System.out.println("field : "+field.getField());
+                System.out.println(msg);
+
+                sb.append(field.getField()+"\n"+msg+"\n" );
+            });
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
+        }
+
+        Optional<User> user=userRepository.findUserByEmailAndPassword(loginVO.getEmail(),encodingInformation(loginVO.getPassword()));
+
+        if(user.isPresent()){
+            Map<String,Long> map=new HashMap<>();
+            map.put("id", user.get().getId());
+            return ResponseEntity.status(HttpStatus.OK).body(map);
+        }else {
+            sb.append("user not found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb);
+        }
+
+    }
+
+
+    private String  encodingInformation(String information) throws  NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        md.update(information.getBytes());
+        return DatatypeConverter.printHexBinary(md.digest());
     }
 
 }

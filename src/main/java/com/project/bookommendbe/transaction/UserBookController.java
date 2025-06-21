@@ -62,7 +62,7 @@ public class UserBookController {
 
     }
 
-    @GetMapping(value = "/r1/bookInfo" )
+    @GetMapping(value = "/r1/searchBookInfo" )
     public List<BookVO> requestUserBook(@RequestParam  Map<String, String> paramMap) throws MalformedURLException {
         List<BookVO> showBooks = new ArrayList<>();
         String title  = paramMap.get("query");
@@ -179,9 +179,10 @@ public class UserBookController {
 
     }
 
-    @GetMapping("/r1/userBook/{userId}")
+    @GetMapping("/r1/userBooks/{userId}")
     public List<UserBookReadVO> getUserBook(@PathVariable long userId) throws JsonProcessingException, MalformedURLException {
 
+        log.error("userId:{}", userId);
         List<UserBookReadVO> userBookReadVOList = new ArrayList<>();
         // 내 책장에서 데이터 가져오기
         List<UserBook> userBooks =userBookRepository.findUserBooksByUserId(userId);

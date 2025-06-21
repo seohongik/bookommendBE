@@ -18,13 +18,20 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     private String signUpId;
     private String username;
     private String email;
     private String password;
+    private String confirmPassword;
 
     private String fullName;
-    private LocalDate dateOfBirth;
+    private String  dateOfBirth;
+
+    private String gender;
+    private String phoneNumber;
+
+    private String phoneNumberTypical;
 
     private LocalDate createdAt;
 
