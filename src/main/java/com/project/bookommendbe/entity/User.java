@@ -8,6 +8,7 @@ import lombok.ToString;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -41,4 +42,5 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Review> reviews;
 
+    private UUID uuid;
 }
