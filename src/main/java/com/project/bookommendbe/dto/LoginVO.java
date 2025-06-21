@@ -14,5 +14,4 @@ public class LoginVO {
 
     @Pattern(regexp = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*()-+=]).{8,}$", message = "대문자,숫자,문자,특수문자 최소 8자 이상이어야 합니다")
     private String password;
-
 }
