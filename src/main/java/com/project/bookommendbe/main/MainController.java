@@ -5,7 +5,6 @@ import com.project.bookommendbe.dto.LoginVO;
 import com.project.bookommendbe.dto.TimelineVO;
 import com.project.bookommendbe.dto.UserVO;
 import com.project.bookommendbe.entity.*;
-import com.project.bookommendbe.util.UserSession;
 import jakarta.validation.Valid;
 import jakarta.xml.bind.DatatypeConverter;
 import lombok.extern.slf4j.Slf4j;
@@ -31,15 +30,13 @@ public class MainController {
     private final ReviewRepository reviewRepository;
     private final ReadingRecordRepository readingRecordRepository;
     private final UserBookRepository userBookRepository;
-    private final UserSession userSession;
 
     @Autowired
-    public MainController(UserRepository userRepository, ReviewRepository reviewRepository, ReadingRecordRepository readingRecordRepository, UserBookRepository userBookRepository, UserSession userSession) {
+    public MainController(UserRepository userRepository, ReviewRepository reviewRepository, ReadingRecordRepository readingRecordRepository, UserBookRepository userBookRepository) {
         this.userRepository = userRepository;
         this.reviewRepository = reviewRepository;
         this.readingRecordRepository = readingRecordRepository;
         this.userBookRepository = userBookRepository;
-        this.userSession = userSession;
     }
 
     @GetMapping("/r1/timeline")
