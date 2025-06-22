@@ -224,7 +224,7 @@ public class UserBookController {
         if(user.isPresent()) {
             Optional<Book> book =bookRepository.findBookByBookIsbn(request.getBookIsbn());
             log.error("장바구니 북 :::{}",book.isPresent());
-            boolean isOwnBook=userBookRepository.existsByBook(book.get());
+            boolean isOwnBook=userBookRepository.existsUserBookByUserAndBookIsbn(user.get(),request.getBookIsbn());
 
             String urlLibraryString = "https://www.nl.go.kr";
             URL urlLibrary = new URL(urlLibraryString);

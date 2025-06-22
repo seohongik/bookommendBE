@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -229,24 +230,21 @@ public class MainController {
 
             if(user.isPresent()) {
                 userFindVO.setEmail(user.get().getEmail());
+                
                 return ResponseEntity.status(HttpStatus.OK).body(userFindVO);
             }else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("정보를 찾지 못했습니다.");
             }
 
-        }else if(userFindVO.getItem().equals("2")) {
+        }else if(userFindVO.getItem().equals("2")){
             Optional<User> user=userRepository.findUserByEmailAndPhoneNumber(userFindVO.getEmail(),encodingInformation(userFindVO.getPhoneNumber()));
 
-            if(user.isPresent()&& user.get().getPassword().equals("")){
-
-                Map<String,Object > map=new HashMap<>();
-                map.put("message","비밀번호를 다시 설정 해주세요");
-                map.put("flag",true);
-                return ResponseEntity.status(HttpStatus.OK).body(map);
-            }
             if(user.isPresent()) {
+                Map<String,Object > map=new HashMap<>();
                 sendEmail(user.get());
-                return ResponseEntity.status(HttpStatus.OK).body("이메일을 확인해주세요");
+                map.put("flag",true);
+                map.put("message","이메일을 확인해주세요");
+                return ResponseEntity.status(HttpStatus.OK).body(map);
             }else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("정보를 찾지 못했습니다.");
             }
@@ -257,18 +255,39 @@ public class MainController {
 
     }
 
+    @GetMapping("/r1/verify")
+    public ResponseEntity verifyEmail(@RequestParam("authNumber") int authNumber, @RequestParam String phoneNumber) throws NoSuchAlgorithmException {
+        // 먼저 authNumber 생성
+        // 파인드 아이디로 찾은다음
+        // 디비에 기록을 위해 auth번호 비교후
+        // 맞으면 비밀번호 초기화
+        // 아니면 에러
+        log.info("authNumber :::: {}",authNumber);
+        Optional<User> user=userRepository.findUserByPhoneNumberAndPasswordAuthNumber(encodingInformation(phoneNumber),authNumber);
+
+        if(user.isPresent()) {
+            user.get().setPassword("");
+            user.get().setConfirmPassword("");
+            return ResponseEntity.status(HttpStatus.OK).body("비밀번호를 다시 설정해주세요");
+        }else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("정보를 찾을 수 없습니다.");
+        }
+
+    }
+
 
     private void sendEmail(User user) throws jakarta.mail.MessagingException {
-        String uuid = UUID.randomUUID().toString();
-        user.setUuid (UUID.fromString(uuid));
+        int authNumber = (int)(Math.random() * 900000) + 100000;
+        user.setPasswordAuthNumber (authNumber);
         userRepository.save(user);
         String text = "<html>" +
                 "<body>" +
                 "<h3>이메일 인증을 위해 아래 링크를 클릭해주세요.</h3>" +
-                "<a href='http://localhost:8080/verify?uuid="+user.getUuid()+ "&id="+user.getId()+"'>이메일 인증하기</a>" +
+                "<h1>"+"bookommend의 비밀번호를 재설정 하기위한 인증번호를 보냅니다."+"</h1>"+
+                "<div>"+authNumber+"</div>" +
                 "</body>" +
                 "</html>";
-        emailConfig.javaMailSender(user.getEmail(), "비밀번호를 재설정 하기위한 링크를 보냅니다.", text);
+        emailConfig.javaMailSender(user.getEmail(), "bookommend의 비밀번호를 재설정 하기위한 링크를 보냅니다.", text);
         //mailService.sendEmail(user.getEmail(),"비밀번호를 재설정 하기위한 링크를 보냅니다.",emailContent);
     }
 
@@ -281,5 +300,6 @@ public class MainController {
 
 
     }
+
 
 }

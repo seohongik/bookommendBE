@@ -42,5 +42,5 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Review> reviews;
 
-    private UUID uuid;
+    private int passwordAuthNumber;
 }
