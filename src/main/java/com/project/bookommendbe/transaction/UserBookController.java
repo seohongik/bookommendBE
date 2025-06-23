@@ -287,7 +287,6 @@ public class UserBookController {
             Review review = new Review();
             ReadingRecord readingRecord = new ReadingRecord();
 
-
             review.setCreatedAt(LocalDateTime.now());
             review.setReviewDate(saveRequest.getRecord().getDate());
             review.setRating(RatingEnum.fromValue(saveRequest.getRating()));
@@ -310,10 +309,12 @@ public class UserBookController {
 
             if(saveRequest.getRecord().getFromPage()==0) {
                 readingRecord.setStatus(String.valueOf(ReadingStatus.TO_READ));
+                userBook.get().setStartedAt(LocalDateTime.now().toString());
             }else  if(saveRequest.getRecord().getFromPage()>0) {
                 readingRecord.setStatus(String.valueOf(ReadingStatus.READING));
             }
             if (saveRequest.getRecord().getFromPage()== saveRequest.getRecord().getToPage()) {
+                userBook.get().setFinishedAt(LocalDateTime.now().toString());
                 readingRecord.setStatus(String.valueOf(ReadingStatus.COMPLETED));
             }
 

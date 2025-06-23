@@ -30,6 +30,7 @@ public class UserBook {
     @Enumerated(EnumType.STRING)
     private ReadingStatus status; // 읽기 상태: TO_READ, READING, COMPLETED
 
+
     private String startedAt;
     private String  finishedAt;
 
