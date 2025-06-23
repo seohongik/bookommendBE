@@ -45,6 +45,9 @@ public class MainController {
         long userId = Long.parseLong(pramMap.get("userId"));
         String date = pramMap.get("date");
 
+        log.info("userId = " + userId);
+        log.info("date = " + date);
+
         User user = userRepository.findUserById(userId);
         List<ReadingRecord> readingRecords =readingRecordRepository.findReadingRecordsByUserAndDate(user,date);
         List<Review> reviews =reviewRepository.findReviewsByUserAndReviewDate(user, date);
