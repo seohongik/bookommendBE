@@ -136,7 +136,6 @@ public class StatisticController {
             statisticVOS.add(statisticVO);
         }
 
-        System.err.println(statisticVOS);
 
         return statisticVOS;
     }

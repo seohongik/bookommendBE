@@ -190,7 +190,6 @@ public class UserBookController {
         for (UserBook userBook : userBooks) {
             Optional<Book> book = bookRepository.findBookByBookIsbn(userBook.getBookIsbn());
 
-            log.error("userBook{}",userBook);
             if(book.isPresent()) {
                 UserBookReadVO userBookReadVO = new UserBookReadVO();
                 userBookReadVO.setBookIsbn(userBook.getBookIsbn());
@@ -223,7 +222,7 @@ public class UserBookController {
 
         if(user.isPresent()) {
             Optional<Book> book =bookRepository.findBookByBookIsbn(request.getBookIsbn());
-            log.error("장바구니 북 :::{}",book.isPresent());
+
             boolean isOwnBook=userBookRepository.existsUserBookByUserAndBookIsbn(user.get(),request.getBookIsbn());
 
             String urlLibraryString = "https://www.nl.go.kr";

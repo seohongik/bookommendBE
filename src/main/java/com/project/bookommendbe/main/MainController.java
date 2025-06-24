@@ -3,7 +3,6 @@ package com.project.bookommendbe.main;
 import com.project.bookommendbe.db.*;
 import com.project.bookommendbe.dto.*;
 import com.project.bookommendbe.entity.*;
-import com.project.bookommendbe.service.MailService;
 import com.project.bookommendbe.util.EmailConfig;
 import jakarta.validation.Valid;
 import jakarta.xml.bind.DatatypeConverter;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -114,8 +112,6 @@ public class MainController {
             bindingResult.getAllErrors().forEach(objectError -> {
                 FieldError field = (FieldError) objectError;
                 String msg = objectError.getDefaultMessage();
-                System.out.println("field : "+field.getField());
-                System.out.println(msg);
 
                 sb.append("field  :" +field.getField());
                 sb.append("\n");
@@ -144,15 +140,12 @@ public class MainController {
     @PutMapping("/u1/user")
     public ResponseEntity user(@Valid @RequestBody UserUpdateVO userUpdateVO, BindingResult bindingResult) throws NoSuchAlgorithmException {
 
-
         if(bindingResult.hasErrors()){
             StringBuilder sb = new StringBuilder();
 
             bindingResult.getAllErrors().forEach(objectError -> {
                 FieldError field = (FieldError) objectError;
                 String msg = objectError.getDefaultMessage();
-                System.out.println("field : "+field.getField());
-                System.out.println(msg);
 
                 sb.append("field  :" +field.getField());
                 sb.append("\n");
@@ -186,8 +179,6 @@ public class MainController {
             bindingResult.getAllErrors().forEach(objectError -> {
                 FieldError field = (FieldError) objectError;
                 String msg = objectError.getDefaultMessage();
-                System.out.println("field : "+field.getField());
-                System.out.println(msg);
 
                 sb.append(field.getField()+"\n"+msg+"\n" );
             });
@@ -218,8 +209,6 @@ public class MainController {
             bindingResult.getAllErrors().forEach(objectError -> {
                 FieldError field = (FieldError) objectError;
                 String msg = objectError.getDefaultMessage();
-                System.out.println("field : "+field.getField());
-                System.out.println(msg);
 
                 sb.append(field.getField()+"\n"+msg+"\n" );
             });
