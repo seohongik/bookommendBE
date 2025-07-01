@@ -1,15 +1,11 @@
 package com.project.bookommendbe.util;
 
 import jakarta.mail.*;
-import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
@@ -31,7 +27,7 @@ public class EmailConfig {
     private String password;
 
 
-    public JavaMailSender javaMailSender(String to, String subject, String text) throws MessagingException {
+    public void javaMailSender(String to, String subject, String text) throws MessagingException {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost(host);
         mailSender.setPort(port);
@@ -56,7 +52,6 @@ public class EmailConfig {
         // 메일 전송
         Transport.send(message);
         System.out.println("메일 전송 성공!");
-        return mailSender;
     }
 
     @Bean

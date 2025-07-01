@@ -1,4 +1,4 @@
-package com.project.bookommendbe.transaction;
+package com.project.bookommendbe.userbook;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.project.bookommendbe.db.*;
@@ -8,6 +8,7 @@ import com.project.bookommendbe.dto.api.library.Result;
 import com.project.bookommendbe.entity.*;
 import com.project.bookommendbe.dto.api.naver.Channel;
 import com.project.bookommendbe.dto.api.naver.Item;
+import com.project.bookommendbe.service.RestTempService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -22,9 +24,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /*
 * c -> create
@@ -43,6 +46,7 @@ public class UserBookController {
     private final ReviewRepository reviewRepository;
     private final ReadingRecordRepository readingRecordRepository;
 
+
     @Value("${naver.clientId}")
     private String clientId;
 
@@ -52,14 +56,14 @@ public class UserBookController {
     @Value("${library.key}")
     private String libraryKey;
 
+
     @Autowired
-    public UserBookController(UserRepository userRepository, BookRepository bookRepository, UserBookRepository userBookRepository, ReviewRepository reviewRepository, ReadingRecordRepository readingRecordRepository) {
+    public UserBookController(UserRepository userRepository, BookRepository bookRepository, UserBookRepository userBookRepository, ReviewRepository reviewRepository, ReadingRecordRepository readingRecordRepository, RestTempService restTempService) {
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
         this.userBookRepository= userBookRepository;
         this.reviewRepository = reviewRepository;
         this.readingRecordRepository = readingRecordRepository;
-
     }
 
     @GetMapping(value = "/r1/searchBookInfo" )
@@ -69,8 +73,6 @@ public class UserBookController {
 
         if(title!=null&& !title.isEmpty()) {
 
-            RestTemplate restTemplate = new RestTemplate();
-
             List<Book> ownBookAfterSave = bookRepository.findBooksByTitleContaining(title);
 
             if (ownBookAfterSave != null && !ownBookAfterSave.isEmpty()) {
@@ -79,6 +81,8 @@ public class UserBookController {
                 return showBooks;
             }
 
+            /*
+            RestTemplate restTemplate = new RestTemplate();
             String urlNaverString = "https://openapi.naver.com";
             URL urlNaver = new URL(urlNaverString);
             HttpHeaders headers = new HttpHeaders();
@@ -97,7 +101,16 @@ public class UserBookController {
 
             HttpEntity<Channel> requestEntity = new HttpEntity<>(headers);
 
-            ResponseEntity<Channel> response = restTemplate.exchange(uriNaverTostring, HttpMethod.GET, requestEntity, Channel.class);
+            ResponseEntity<Channel> response = restTemplate.exchange(uriNaverTostring, HttpMethod.GET, requestEntity, Channel.class);*/
+
+            Map<String,String> headersItem = new ConcurrentHashMap<>();
+
+            headersItem.put("X-Naver-Client-Id", clientId);
+            headersItem.put("X-Naver-Client-Secret", secretId);
+            String url = "https://openapi.naver.com";
+            String path  ="/v1/search/book.json";
+            RestTempService<Channel> restTempService = new RestTempService<Channel>();
+            ResponseEntity<Channel> response = restTempService.response(url,path, paramMap, headersItem, HttpMethod.GET,Channel.class);
 
             if (response.getBody() != null) {
 
@@ -180,18 +193,21 @@ public class UserBookController {
     }
 
     @GetMapping("/r1/userBooks/{userId}")
-    public List<UserBookReadVO> getUserBook(@PathVariable long userId) throws JsonProcessingException, MalformedURLException {
+    public List<UserBookVO> getUserBook(@PathVariable long userId) throws JsonProcessingException, MalformedURLException {
 
         log.error("userId:{}", userId);
-        List<UserBookReadVO> userBookReadVOList = new ArrayList<>();
+        List<UserBookVO> userBookReadVOList = new ArrayList<>();
         // 내 책장에서 데이터 가져오기
-        List<UserBook> userBooks =userBookRepository.findUserBooksByUserId(userId);
+
+        User user=userRepository.findUserById(userId);
+
+        List<UserBook> userBooks =userBookRepository.findUserBooksByUser(user);
 
         for (UserBook userBook : userBooks) {
             Optional<Book> book = bookRepository.findBookByBookIsbn(userBook.getBookIsbn());
 
             if(book.isPresent()) {
-                UserBookReadVO userBookReadVO = new UserBookReadVO();
+                UserBookVO userBookReadVO = new UserBookVO();
                 userBookReadVO.setBookIsbn(userBook.getBookIsbn());
                 userBookReadVO.setTitle(book.get().getTitle());
                 userBookReadVO.setAuthor(book.get().getAuthor());
@@ -217,7 +233,7 @@ public class UserBookController {
     @PostMapping("/c1/userBook")
     public void insertUserBookBy( @RequestBody UserBookSaveVO request) throws MalformedURLException {
 
-        RestTemplate restTemplate = new RestTemplate();
+        //RestTemplate restTemplate = new RestTemplate();
         Optional<User> user = userRepository.findById(request.getUserId());
 
         if(user.isPresent()) {
@@ -225,6 +241,7 @@ public class UserBookController {
 
             boolean isOwnBook=userBookRepository.existsUserBookByUserAndBookIsbn(user.get(),request.getBookIsbn());
 
+            /*
             String urlLibraryString = "https://www.nl.go.kr";
             URL urlLibrary = new URL(urlLibraryString);
             UriComponents uriComponentsLibrary = UriComponentsBuilder.newInstance()
@@ -239,13 +256,25 @@ public class UserBookController {
                     .build();
             String uriLibrary = uriComponentsLibrary.toUriString();
 
-            ResponseEntity<Result> result = restTemplate.getForEntity(uriLibrary, Result.class);
+            ResponseEntity<Result> result = restTemplate.getForEntity(uriLibrary, Result.class);*/
 
 
-            if (result.getBody() != null) {
-                if (result.getBody().getDocs() != null) {
+            String url = "https://www.nl.go.kr";
+            String path  ="/seoji/SearchApi.do";
+            Map<String,String> paramMap = new ConcurrentHashMap<>();
+            paramMap.put("cert_key", libraryKey);
+            paramMap.put("result_style","json");
+            paramMap.put("page_no", "1");
+            paramMap.put("page_size", "10");
+            paramMap.put("isbn", request.getBookIsbn());
 
-                    for (Doc doc : result.getBody().getDocs()) {
+            RestTempService<Result> restTempService = new RestTempService<>();
+            ResponseEntity<Result> response = restTempService.response(url,path, paramMap, null, HttpMethod.GET, Result.class);
+
+            if (response.getBody() != null) {
+                if (response.getBody().getDocs() != null) {
+
+                    for (Doc doc : response.getBody().getDocs()) {
                         log.info("category:{}", doc.getSubject());
                         book.get().setBookCategory(BookCategory.fromCode(doc.getSubject()));
                         bookRepository.save(book.get());
@@ -264,7 +293,9 @@ public class UserBookController {
     }
     @PutMapping("/u1/userBookPageCount/{userId}/{userBookId}")
     public void updateUserBookPageCountBy(@PathVariable Long userId, @PathVariable Long userBookId, @RequestBody Map<String,String> request) {
-        Optional<UserBook> userBook=userBookRepository.findUserBookByUserIdAndId(userId,userBookId);
+
+        User user=userRepository.findUserById(userId);
+        Optional<UserBook> userBook=userBookRepository.findUserBookByUserAndId(user,userBookId);
 
         if(userBook.isPresent()) {
             int pageCount = Integer.parseInt(request.get("pageCount"));
@@ -276,11 +307,13 @@ public class UserBookController {
     }
 
     @PostMapping("/c1/userBookRecordAndReview")
-    public void saveUserBookRecordAndReviewBy(@RequestBody SavingRecordAndReviewVO saveRequest) {
+    public void saveReadingRecordAndReviewBy(@RequestBody SavingRecordAndReviewVO saveRequest) {
 
         log.info("saveRequest::::::{}",saveRequest);
 
-        Optional<UserBook> userBook = userBookRepository.findUserBookByUserIdAndId(saveRequest.getUserId(), saveRequest.getUserBookId());
+        User user = userRepository.findUserById(saveRequest.getUserId());
+
+        Optional<UserBook> userBook = userBookRepository.findUserBookByUserAndId(user, saveRequest.getUserBookId());
 
         if(userBook.isPresent()) {
             Review review = new Review();

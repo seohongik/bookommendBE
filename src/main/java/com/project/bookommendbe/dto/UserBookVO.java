@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @Accessors(chain = true)
 @Data
-public class UserBookReadVO {
+public class UserBookVO {
 
     private String coverImageUrl;
     private long userId;

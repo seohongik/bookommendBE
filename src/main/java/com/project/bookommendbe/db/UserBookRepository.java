@@ -12,15 +12,15 @@ import java.util.Optional;
 @Repository
 public interface UserBookRepository extends JpaRepository<UserBook, Long> {
 
-    UserBook findByUser(User user);
+    Optional<UserBook> findUserBookByUser(User user);
 
     List<UserBook> findUserBooksByUser(User user);
 
-    List<UserBook> findUserBooksByUserId(long userId);
+    Optional<UserBook> findUserBookByIdAndUser(Long userBookId, User user);
 
-    Optional<UserBook> findUserBookByUserIdAndId(Long userId, Long userBookId);
-
-    UserBook findUserBookByUserIdAndBookIsbn(long userId, String bookIsbn);
+    Optional<UserBook> findUserBookByUserAndBookIsbn(User user, String bookIsbn);
 
     boolean existsUserBookByUserAndBookIsbn(User userId, String bookIsbn);
+
+    Optional<UserBook> findUserBookByUserAndId(User user, Long id);
 }
