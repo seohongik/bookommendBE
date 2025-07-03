@@ -26,10 +26,7 @@ public class StatisticController {
     private final StatisticMonthlyBookCategoryRepository statisticMonthlyBookCategoryRepository;
 
     @GetMapping("/r1/statistic/monthly-read-count")
-    public List<StatisticVO> statisticReadCount(@RequestParam Long userId,
-                                            @RequestParam int year) {
-
-        log.info("Monthly read count for user {} and year {}", userId, year);
+    public List<StatisticVO> statisticReadCount(@RequestParam Long userId, @RequestParam int year) {
 
         List<StatisticVO> statisticVOS = new ArrayList<>();
 
@@ -56,8 +53,7 @@ public class StatisticController {
     }
 
     @GetMapping("/r1/statistic/monthly-book-money")
-    public List<StatisticVO> statisticBookMoney(@RequestParam Long userId,
-                                       @RequestParam int year) {
+    public List<StatisticVO> statisticBookMoney(@RequestParam Long userId, @RequestParam int year) {
 
 
         List<StatisticVO> statisticVOS = new ArrayList<>();
@@ -83,8 +79,7 @@ public class StatisticController {
     }
 
     @GetMapping("/r1/statistic/monthly-book-category")
-    public List<StatisticVO> statisticBookCategory(@RequestParam Long userId,
-                                                @RequestParam int year) {
+    public List<StatisticVO> statisticBookCategory(@RequestParam Long userId, @RequestParam int year) {
 
 
         String[] categoriesList = {
@@ -135,7 +130,6 @@ public class StatisticController {
             }
             statisticVOS.add(statisticVO);
         }
-
 
         return statisticVOS;
     }

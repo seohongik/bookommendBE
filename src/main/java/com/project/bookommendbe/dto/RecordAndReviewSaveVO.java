@@ -1,13 +1,7 @@
 package com.project.bookommendbe.dto;
 
 
-import com.project.bookommendbe.entity.RatingEnum;
-import com.project.bookommendbe.entity.Review;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.time.LocalDate;
 
 /**
  'userId':1,
@@ -28,7 +22,7 @@ import java.time.LocalDate;
  */
 
 @Data
-public class SavingRecordAndReviewVO {
+public class RecordAndReviewSaveVO {
 
     private Long userId;
     private Long userBookId;

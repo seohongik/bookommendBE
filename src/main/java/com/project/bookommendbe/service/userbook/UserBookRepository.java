@@ -1,4 +1,4 @@
-package com.project.bookommendbe.db;
+package com.project.bookommendbe.service.userbook;
 
 
 import com.project.bookommendbe.entity.User;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface UserBookRepository extends JpaRepository<UserBook, Long> {
+interface UserBookRepository extends JpaRepository<UserBook, Long> {
 
     Optional<UserBook> findUserBookByUser(User user);
 
@@ -22,5 +22,4 @@ public interface UserBookRepository extends JpaRepository<UserBook, Long> {
 
     boolean existsUserBookByUserAndBookIsbn(User userId, String bookIsbn);
 
-    Optional<UserBook> findUserBookByUserAndId(User user, Long id);
 }

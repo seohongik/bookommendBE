@@ -1,5 +1,7 @@
 package com.project.bookommendbe.util;
 
+import com.project.bookommendbe.entity.User;
+import com.project.bookommendbe.service.user.UserService;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
@@ -9,11 +11,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
 @Configuration
 public class EmailConfig {
 
+    private final UserService userService;
     @Value("${spring.mail.host}")
     private String host;
 
@@ -25,6 +29,10 @@ public class EmailConfig {
 
     @Value("${spring.mail.password}")
     private String password;
+
+    public EmailConfig(UserService userService) {
+        this.userService = userService;
+    }
 
 
     public void javaMailSender(String to, String subject, String text) throws MessagingException {
@@ -67,5 +75,18 @@ public class EmailConfig {
         return props;
     }
 
+    public void sendEmail(User user) throws jakarta.mail.MessagingException, NoSuchAlgorithmException {
+        int authNumber = (int)(Math.random() * 900000) + 100000;
+        userService.updatePasswordAuthNumber(user,authNumber);
+        String text = "<html>" +
+                "<body>" +
+                "<h3>이메일 인증을 위해 아래 링크를 클릭해주세요.</h3>" +
+                "<h1>"+"bookommend의 비밀번호를 재설정 하기위한 인증번호를 보냅니다."+"</h1>"+
+                "<div>"+authNumber+"</div>" +
+                "</body>" +
+                "</html>";
+        javaMailSender(user.getEmail(), "bookommend의 비밀번호를 재설정 하기위한 링크를 보냅니다.", text);
+        //mailService.sendEmail(user.getEmail(),"비밀번호를 재설정 하기위한 링크를 보냅니다.",emailContent);
+    }
 
 }
