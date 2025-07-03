@@ -38,6 +38,7 @@ public class UserBookController {
     private final UserBookService userBookService;
     private final ReviewService reviewService;
     private final RecordService recordService;
+    private final RestTempService restTempService;
 
 
     @Value("${naver.clientId}")
@@ -51,13 +52,13 @@ public class UserBookController {
 
 
     @Autowired
-    public UserBookController(UserService userService, BookService bookService, RecordService recordService, UserBookService userBookService, ReviewService reviewService) {
+    public UserBookController(UserService userService, BookService bookService, RecordService recordService, UserBookService userBookService, ReviewService reviewService, RestTempService restTempService) {
         this.userService = userService;
         this.bookService = bookService;
         this.recordService = recordService;
         this.userBookService = userBookService;
         this.reviewService = reviewService;
-
+        this.restTempService = restTempService;
     }
 
     @GetMapping(value = "/r1/searchBookInfo" )
@@ -75,9 +76,7 @@ public class UserBookController {
             headersItem.put("X-Naver-Client-Id", clientId);
             headersItem.put("X-Naver-Client-Secret", secretId);
 
-            RestTempService<Channel> restTempService = new RestTempService<Channel>();
             ResponseEntity<Channel> response = restTempService.response(url,path, paramMap, headersItem, HttpMethod.GET,Channel.class);
-
             bookService.saveApiNAVERBooks(response.getBody().getItems());
             showableBooks = bookService.findSavedBook(showableBooks, paramMap);
 
@@ -85,8 +84,6 @@ public class UserBookController {
 
         return showableBooks;
     }
-
-
 
 
     @GetMapping("/r1/userBooks/{userId}")
@@ -120,9 +117,7 @@ public class UserBookController {
             paramMap.put("page_size", "10");
             paramMap.put("isbn", request.getBookIsbn());
 
-            RestTempService<Result> restTempService = new RestTempService<>();
             ResponseEntity<Result> response = restTempService.response(url,path, paramMap, null, HttpMethod.GET, Result.class);
-
             Optional<Book> book = bookService.saveApiCategoryBooks(response.getBody().getDocs(), request.getBookIsbn());
             userBookService.saveMyBook(isOwnBook,book,user);
         }
