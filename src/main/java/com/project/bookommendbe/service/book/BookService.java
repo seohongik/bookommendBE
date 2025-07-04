@@ -10,6 +10,7 @@ import com.project.bookommendbe.entity.UserBook;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 
 import java.util.*;
 
@@ -26,19 +27,15 @@ public class BookService {
 
 
     // 처리할 서비스 로직 [S]
+    public List<BookVO> findSavedBook(List<BookVO> showableBooks, MultiValueMap<String, String> paramMap) {
 
-    public List<BookVO> findSavedBook(List<BookVO> showableBooks, Map<String, String> paramMap) {
-
-        //List<Book> books = bookDAO.findAll(BookEnum.FIND_BOOKS_BY_SPLIT_TITLE_CONTAINING, paramMap.get("query"));
-
-        List<Book> books=bookRepository.findBooksBySplitTitleContaining(paramMap.get("query"));
+        List<Book> books=bookRepository.findBooksBySplitTitleContaining(split(paramMap.get("query").toString()));
 
         if (books != null && !books.isEmpty()) {
             makeDisplayBooks(showableBooks, books);
-            return showableBooks;
         }
 
-        return null;
+        return showableBooks;
 
     }
 
@@ -68,14 +65,20 @@ public class BookService {
             }
     }
 
-    public Optional<Book> saveApiCategoryBooks(List<Doc> docs, String bookIsbn) {
+    public void saveApiCategoryBooks(List<Doc> docs,Optional<Book> book) {
 
-        Optional<Book> book = bookRepository.findBookByBookIsbn(bookIsbn);
-        for (Doc doc : docs) {
-            book.get().setBookCategory(BookCategory.fromCode(doc.getSubject()));
-            bookRepository.save(book.get());
+        if(book.isPresent()) {
+            for (Doc doc : docs) {
+                book.get().setBookCategory(BookCategory.fromCode(doc.getSubject()));
+                bookRepository.save(book.get());
+            }
         }
-        return Optional.of(book.get());
+
+    }
+
+    public Optional<Book> getBookByIsbn(String bookIsbn) {
+        Optional<Book> book = bookRepository.findBookByBookIsbn(bookIsbn);
+        return book;
     }
 
     private void  makeDisplayBooks(List<BookVO> showableBook, List<Book> apiBooks) {

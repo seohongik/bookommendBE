@@ -2,8 +2,6 @@ package com.project.bookommendbe.service.book;
 
 
 import com.project.bookommendbe.entity.Book;
-import com.project.bookommendbe.entity.User;
-import com.project.bookommendbe.entity.UserBook;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,6 +16,6 @@ interface BookRepository extends JpaRepository<Book, Long> {
 
     List<Book> findBooksBySplitTitleContaining(String splitTitle);
 
-    List<Book> findBooksByTitleContaining(String title);
+   // List<Book> findBooksByTitleContaining(String title);
 
 }

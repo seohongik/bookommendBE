@@ -37,10 +37,8 @@ public class UserController {
     public ResponseEntity userCreate( @Valid @RequestBody UserVO userVO, BindingResult bindingResult) throws NoSuchAlgorithmException {
 
         StringBuilder sb = new StringBuilder();
-        boolean isError=isError(bindingResult, sb);
-        if(!isError) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
-        }
+        isError(bindingResult, sb);
+
 
         Optional<User> user = userService.create(userVO);
         return makeResponse(user,  new StringBuilder("정보를 찾을 수 없음 관리자에게 연락주세요"),null);
@@ -49,10 +47,8 @@ public class UserController {
     @PutMapping("/u1/user")
     public ResponseEntity user(@Valid @RequestBody UserUpdateVO updateVO, BindingResult bindingResult) throws NoSuchAlgorithmException {
         StringBuilder sb = new StringBuilder();
-        boolean isError=isError(bindingResult, sb);
-        if(!isError) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
-        }
+        isError(bindingResult, sb);
+
 
         UserVO userVO = new UserVO();
         userVO.setEmail(updateVO.getEmail());
@@ -67,10 +63,8 @@ public class UserController {
     public ResponseEntity login(@Valid @ModelAttribute LoginVO loginVO, BindingResult bindingResult) throws NoSuchAlgorithmException {
 
         StringBuilder sb = new StringBuilder();
-        boolean isError=isError(bindingResult, sb);
-        if(!isError) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
-        }
+        isError(bindingResult, sb);
+
 
         UserVO userVO = new UserVO();
         userVO.setEmail(loginVO.getEmail());
@@ -141,7 +135,7 @@ public class UserController {
         }
     }
 
-    private boolean isError(BindingResult bindingResult, StringBuilder sb) {
+    private void isError(BindingResult bindingResult, StringBuilder sb) {
 
         if(bindingResult.hasErrors()){
 
@@ -150,10 +144,8 @@ public class UserController {
                 String msg = objectError.getDefaultMessage();
                 sb.append(field.getField()+"\n"+msg+"\n" );
             });
-            return  true;
-           // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
         }
-        return false;
+
     }
 
 }

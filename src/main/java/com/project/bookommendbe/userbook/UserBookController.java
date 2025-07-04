@@ -16,8 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.module.Configuration;
 import java.net.MalformedURLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,12 +65,14 @@ public class UserBookController {
     }
 
     @GetMapping(value = "/r1/searchBookInfo" )
-    public List<BookVO> requestUserBook(@RequestParam  Map<String, String> paramMap) throws MalformedURLException {
+    public List<BookVO> requestUserBook(@RequestParam  MultiValueMap<String, String> paramMap) throws MalformedURLException {
 
         List<BookVO> showableBooks = new ArrayList<>();
         showableBooks=bookService.findSavedBook(showableBooks, paramMap);
+        log.info("!!!!!!!!!!!!!!!!!!!!beforeAPi");
 
-        if (showableBooks == null) {
+
+        if (showableBooks.isEmpty()) {
 
             String url = "https://openapi.naver.com";
             String path  ="/v1/search/book.json";
@@ -79,6 +84,7 @@ public class UserBookController {
             ResponseEntity<Channel> response = restTempService.response(url,path, paramMap, headersItem, HttpMethod.GET,Channel.class);
             bookService.saveApiNAVERBooks(response.getBody().getItems());
             showableBooks = bookService.findSavedBook(showableBooks, paramMap);
+            log.info("!!!!!!!!!!!!!!!!!!!!afterAPi");
 
         }
 
@@ -101,25 +107,32 @@ public class UserBookController {
     @PostMapping("/c1/userBook")
     public void insertUserBookAndBookCategoryBy( @RequestBody UserBookSaveVO request) throws MalformedURLException {
 
-
         Optional<User> user = userService.findUserById(request.getUserId());
 
         if(user.isPresent()) {
 
             boolean isOwnBook=userBookService.existsUserBookByUserAndBookIsbn(user.get(),request.getBookIsbn());
+            MultiValueMap<String,String> paramMap = new LinkedMultiValueMap<>();
 
             String url = "https://www.nl.go.kr";
             String path  ="/seoji/SearchApi.do";
-            Map<String,String> paramMap = new ConcurrentHashMap<>();
-            paramMap.put("cert_key", libraryKey);
-            paramMap.put("result_style","json");
-            paramMap.put("page_no", "1");
-            paramMap.put("page_size", "10");
-            paramMap.put("isbn", request.getBookIsbn());
+            paramMap.put("cert_key", Collections.singletonList(libraryKey));
+            paramMap.put("result_style", Collections.singletonList("json"));
+            paramMap.put("isbn", Collections.singletonList(request.getBookIsbn()));
+            paramMap.put("page_no", Collections.singletonList("1"));
+            paramMap.put("page_size", Collections.singletonList("10"));
+
 
             ResponseEntity<Result> response = restTempService.response(url,path, paramMap, null, HttpMethod.GET, Result.class);
-            Optional<Book> book = bookService.saveApiCategoryBooks(response.getBody().getDocs(), request.getBookIsbn());
-            userBookService.saveMyBook(isOwnBook,book,user);
+
+            log.error(response.getBody().toString());
+            Optional<Book> book= bookService.getBookByIsbn(request.getBookIsbn());
+
+            if(response.getBody().getDocs()!=null) {
+                bookService.saveApiCategoryBooks(response.getBody().getDocs(), book);
+            }
+            userBookService.saveMyBook(isOwnBook, book, user);
+
         }
     }
     @PutMapping("/u1/userBookPageCount/{userId}/{userBookId}")
