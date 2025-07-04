@@ -1,6 +1,7 @@
 package com.project.bookommendbe.service.user;
 
 import com.project.bookommendbe.entity.User;
+import jakarta.validation.constraints.Email;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,5 +18,7 @@ interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findUserByEmailAndPhoneNumber( String email, String phoneNumber);
 
-    Optional<User> findUserByPhoneNumberAndPasswordAuthNumber(String phoneNumber, int passwordAuthNumber);
+    //Optional<User> findUserByPhoneNumberAndPasswordAuthNumber(String phoneNumber, int passwordAuthNumber);
+
+    Optional<User> findUserByEmailAndPhoneNumberAndPasswordAuthNumber(String email, String phoneNumber, int authNumber);
 }

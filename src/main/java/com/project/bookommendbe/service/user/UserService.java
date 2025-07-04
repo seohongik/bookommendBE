@@ -3,6 +3,7 @@ package com.project.bookommendbe.service.user;
 import com.project.bookommendbe.dto.*;
 import com.project.bookommendbe.entity.User;
 import jakarta.xml.bind.DatatypeConverter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -25,7 +27,7 @@ public class UserService {
         return userRepository.findUserById(id);
     }
 
-    public Optional<User> create(UserVO userVO) throws NoSuchAlgorithmException {
+    public void create(UserVO userVO) throws NoSuchAlgorithmException {
         User user = new User();
         user.setUsername(userVO.getUsername());
         user.setPassword(encodingInformation(userVO.getPassword()));
@@ -38,23 +40,14 @@ public class UserService {
         user.setPhoneNumberTypical(userVO.getPhoneNumber());
 
         userRepository.save(user);
-        return Optional.of(user);
     }
 
 
     public Optional<User> findUserByEmailAndPhoneNumber(UserVO userVO) throws NoSuchAlgorithmException {
 
         String[] param = {userVO.getEmail(), encodingInformation(userVO.getPhoneNumber())};
-        //Optional<User> user=userDAO.find( UserEnum.FIND_USER_BY_EMAIL_AND_PHONE_NUMBER ,null,null,param, null);
         Optional<User> user=userRepository.findUserByEmailAndPhoneNumber(param[0], param[1]);
-
-        if(user.isPresent()){
-            user.get().setPassword(encodingInformation(userVO.getPassword()));
-            user.get().setConfirmPassword(encodingInformation(userVO.getConfirmPassword()));
-            userRepository.save(user.get());
-            return user;
-        }
-        return Optional.empty();
+        return user;
 
     }
 
@@ -88,14 +81,31 @@ public class UserService {
         return DatatypeConverter.printHexBinary(md.digest());
     }
 
-    public void updatePasswordAuthNumber(User user, int authNumber) throws NoSuchAlgorithmException {
-        user.setPasswordAuthNumber (authNumber);
-        userRepository.save(user);
+    public void updatePassword(UserVO uservo) throws NoSuchAlgorithmException {
+
+        Optional<User> user = userRepository.findUserByEmailAndPhoneNumberAndPasswordAuthNumber(uservo.getEmail(), encodingInformation(uservo.getPhoneNumber()), uservo.getAuthNumber());
+        if(user.isPresent()) {
+            user.get().setPassword(encodingInformation(uservo.getPassword()));
+            user.get().setConfirmPassword(encodingInformation(uservo.getConfirmPassword()));
+            userRepository.save(user.get());
+        }
     }
 
-    public Optional<User> findUserByPhoneNumberAndPasswordAuthNumber(UserVO userVO){
 
-        return userRepository.findUserByPhoneNumberAndPasswordAuthNumber(userVO.getPhoneNumber(), userVO.getAuthNumber());
+    public void changePasswordEmptyAndMakeAuthNumber(UserVO userVO,int authNumber) throws NoSuchAlgorithmException {
+        Optional<User> user=userRepository.findUserByEmailAndPhoneNumber(userVO.getEmail(), encodingInformation(userVO.getPhoneNumber()));
+        if(user.isPresent()) {
+            user.get().setPassword("");
+            user.get().setConfirmPassword("");
+            user.get().setPasswordAuthNumber(authNumber);
+            userRepository.save(user.get());
+        }
+    }
+
+    public boolean verify(UserVO userVO) throws NoSuchAlgorithmException {
+
+        Optional<User> user=userRepository.findUserByEmailAndPhoneNumberAndPasswordAuthNumber(userVO.getEmail(), encodingInformation(userVO.getPhoneNumber()), userVO.getAuthNumber());
+        return user.isPresent();
     }
 }
 

@@ -4,14 +4,16 @@ import com.project.bookommendbe.dto.*;
 import com.project.bookommendbe.entity.*;
 import com.project.bookommendbe.service.TimeLineService;
 import com.project.bookommendbe.service.user.UserService;
+import com.project.bookommendbe.util.AuthNumber;
 import com.project.bookommendbe.util.EmailConfig;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.NoSuchAlgorithmException;
@@ -38,33 +40,46 @@ public class UserController {
 
         StringBuilder sb = new StringBuilder();
         isError(bindingResult, sb);
+        System.out.println( isError(bindingResult, sb));
 
+        if(!bindingResult.hasErrors()) {
+            userService.create(userVO);
+        }else {
+            return isError(bindingResult, sb);
+        }
 
-        Optional<User> user = userService.create(userVO);
-        return makeResponse(user,  new StringBuilder("정보를 찾을 수 없음 관리자에게 연락주세요"),null);
+        return makeResponse(sb, new HashMap<>());
+
     }
 
+    /*
     @PutMapping("/u1/user")
     public ResponseEntity user(@Valid @RequestBody UserUpdateVO updateVO, BindingResult bindingResult) throws NoSuchAlgorithmException {
         StringBuilder sb = new StringBuilder();
-        isError(bindingResult, sb);
-
+        if(bindingResult.hasErrors()) {
+            return isError(bindingResult, sb);
+        }
 
         UserVO userVO = new UserVO();
         userVO.setEmail(updateVO.getEmail());
         userVO.setPhoneNumber(updateVO.getPhoneNumber());
+        userVO.setPassword(updateVO.getPassword());
+        userVO.setConfirmPassword(updateVO.getConfirmPassword());
 
-        Optional<User> user=userService.findUserByEmailAndPhoneNumber(userVO);
-        return makeResponse(user,  new StringBuilder("정보를 찾을 수 없음 관리자에게 연락주세요"),null);
+        userService.updatePassword(userVO);
 
-    }
+        return makeResponse( sb,new HashMap<>());
+
+    }*/
 
     @GetMapping("/r1/login")
     public ResponseEntity login(@Valid @ModelAttribute LoginVO loginVO, BindingResult bindingResult) throws NoSuchAlgorithmException {
 
         StringBuilder sb = new StringBuilder();
-        isError(bindingResult, sb);
 
+        if(bindingResult.hasErrors()) {
+            return isError(bindingResult, sb);
+        }
 
         UserVO userVO = new UserVO();
         userVO.setEmail(loginVO.getEmail());
@@ -72,79 +87,111 @@ public class UserController {
         Optional<User> user=userService.findUserByEmailAndPassword(userVO);
 
         Map<String,String> map=new HashMap<>();
-        map.put("id", String.valueOf(user.get().getId()));
+        if(user.isPresent()) {
+            map.put("id", String.valueOf(user.get().getId()));
+            return makeResponse(sb,map);
+        }
 
-        return makeResponse(user,new StringBuilder("user not found"),map);
+        return makeResponse(new StringBuilder("정보가 없습니다."), new HashMap<>());
 
     }
 
-    @GetMapping("/r1/isUser")
-    public ResponseEntity passwordOrID(@ModelAttribute UserFindVO userFindVO, BindingResult bindingResult) throws NoSuchAlgorithmException, jakarta.mail.MessagingException {
+    @GetMapping("/r1/isUserId")
+    public ResponseEntity isUserId(@Valid @ModelAttribute UserFindIdVO userFindVO, BindingResult bindingResult) throws NoSuchAlgorithmException, jakarta.mail.MessagingException {
 
-        if(userFindVO.getItem().equals("1")) {
-            UserVO userVO = new UserVO();
-            userVO.setSignUpId(userFindVO.getSignUpId());
-            userVO.setPhoneNumber(String.valueOf(userFindVO.getPhoneNumber()));
+        StringBuilder sb = new StringBuilder();
 
-            Optional<User> user=userService.findUserBySignUpIdAndPhoneNumber(userVO);
-            Map<String,String> map=new HashMap<>();
+        if(bindingResult.hasErrors()) {
+            return isError(bindingResult, sb);
+        }
+
+        UserVO userVO = new UserVO();
+        userVO.setSignUpId(userFindVO.getSignUpId());
+        userVO.setPhoneNumber(String.valueOf(userFindVO.getPhoneNumber()));
+
+        Optional<User> user=userService.findUserBySignUpIdAndPhoneNumber(userVO);
+        if(user.isPresent()) {
+            Map<String, String> map=new HashMap<>();
             map.put("email", user.get().getEmail());
+            return makeResponse(new StringBuilder(), map);
+        }else {
+            return makeResponse(new StringBuilder("정보가 없습니다."), new HashMap<>());
+        }
 
-            return makeResponse(user,new StringBuilder("정보를 찾지 못했습니다."), map);
+    }
 
-        }else if(userFindVO.getItem().equals("2")){
-            UserVO userVO = new UserVO();
-            userVO.setEmail(userFindVO.getEmail());
-            userVO.setPhoneNumber(String.valueOf(userFindVO.getPhoneNumber()));
-            Optional<User> user=userService.findUserByEmailAndPhoneNumber(userVO);
+    @GetMapping("/r1/isUserPw")
+    public ResponseEntity isUserPw(@Valid @ModelAttribute UserFindPwVO userFindVO, BindingResult bindingResult) throws NoSuchAlgorithmException, jakarta.mail.MessagingException {
 
+        StringBuilder sb = new StringBuilder();
+
+        if(bindingResult.hasErrors()) {
+            return isError(bindingResult, sb);
+        }
+
+        UserVO userVO = new UserVO();
+        userVO.setEmail(userFindVO.getEmail());
+        userVO.setPhoneNumber(String.valueOf(userFindVO.getPhoneNumber()));
+        Optional<User> user=userService.findUserByEmailAndPhoneNumber(userVO);
+
+
+        if(user.isPresent()) {
+            StringBuilder stringBuilder = new StringBuilder();
+            int authNumber = AuthNumber.getInstance().getAuthNumber();
             Map<String, String> map = new HashMap<>();
             map.put("flag", "true");
             map.put("message", "이메일을 확인해주세요");
-            if(user.isPresent()) {
-                emailConfig.sendEmail(user.get());
-            }
-            return makeResponse(user,new StringBuilder("user not found"), map);
-
+            userService.changePasswordEmptyAndMakeAuthNumber(userVO, authNumber);
+            emailConfig.sendEmail(user.get(),  authNumber);
+            return makeResponse(sb, map);
+        }else {
+            return makeResponse(new StringBuilder("정보가 없습니다"), new HashMap<>());
         }
-
-        return makeResponse(null, new StringBuilder("입력값을 다시 확인 해 주세요 "), null);
 
     }
 
     @GetMapping("/r1/verify")
-    public ResponseEntity verifyEmail(@RequestParam("authNumber") int authNumber, @RequestParam String phoneNumber) throws NoSuchAlgorithmException {
+    public ResponseEntity verifyEmail(@RequestParam("authNumber") int authNumber,@Valid @ModelAttribute UserFindPwVO userFindVO ) throws NoSuchAlgorithmException {
         UserVO userVO = new UserVO();
+        userVO.setPhoneNumber(userFindVO.getPhoneNumber());
+        userVO.setEmail(userFindVO.getEmail());
         userVO.setAuthNumber(authNumber);
-        userVO.setPhoneNumber(phoneNumber);
-        Optional<User> user=userService.findUserByPhoneNumberAndPasswordAuthNumber(userVO);
 
-        if(user.isPresent()) {
-            user.get().setPassword("");
-            user.get().setConfirmPassword("");
+        StringBuilder sb = new StringBuilder();
+        boolean verified=userService.verify(userVO);
+        if(verified) {
+            Map<String, String> map = new HashMap<>();
+            map.put("authNumber", String.valueOf(authNumber));
+            return makeResponse(sb, map);
+        }else {
+            return makeResponse(new StringBuilder("정보가 없습니다"), new HashMap<>());
         }
-        return makeResponse(user,  new StringBuilder("인증 실패"),null);
     }
 
-    private ResponseEntity makeResponse(Optional<User> user, StringBuilder message, Map<String,String> value) {
 
-        if(user.isPresent()) {
+    @PutMapping("/u1/password/verified")
+    public void updatePasswordUser(@RequestBody UserVO userVO) throws NoSuchAlgorithmException {
+        log.error(userVO.toString());
+        userService.updatePassword(userVO);
+    }
+
+    private ResponseEntity makeResponse( StringBuilder message, Map<String,String> value) {
+
+        if(!value.isEmpty()){
             return ResponseEntity.status(HttpStatus.OK).body(value);
         }else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
         }
     }
 
-    private void isError(BindingResult bindingResult, StringBuilder sb) {
+    private ResponseEntity isError(BindingResult bindingResult, StringBuilder sb) {
 
-        if(bindingResult.hasErrors()){
+        bindingResult.getAllErrors().forEach(objectError -> {
+            String msg = objectError.getDefaultMessage();
+            sb.append(msg).append("\n").append("\n");
+        });
 
-            bindingResult.getAllErrors().forEach(objectError -> {
-                FieldError field = (FieldError) objectError;
-                String msg = objectError.getDefaultMessage();
-                sb.append(field.getField()+"\n"+msg+"\n" );
-            });
-        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
 
     }
 

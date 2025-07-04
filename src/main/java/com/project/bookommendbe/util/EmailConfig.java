@@ -17,7 +17,6 @@ import java.util.Properties;
 @Configuration
 public class EmailConfig {
 
-    private final UserService userService;
     @Value("${spring.mail.host}")
     private String host;
 
@@ -29,10 +28,6 @@ public class EmailConfig {
 
     @Value("${spring.mail.password}")
     private String password;
-
-    public EmailConfig(UserService userService) {
-        this.userService = userService;
-    }
 
 
     public void javaMailSender(String to, String subject, String text) throws MessagingException {
@@ -75,9 +70,8 @@ public class EmailConfig {
         return props;
     }
 
-    public void sendEmail(User user) throws jakarta.mail.MessagingException, NoSuchAlgorithmException {
-        int authNumber = (int)(Math.random() * 900000) + 100000;
-        userService.updatePasswordAuthNumber(user,authNumber);
+    public void sendEmail(User user, int authNumber) throws jakarta.mail.MessagingException, NoSuchAlgorithmException {
+
         String text = "<html>" +
                 "<body>" +
                 "<h3>이메일 인증을 위해 아래 링크를 클릭해주세요.</h3>" +
