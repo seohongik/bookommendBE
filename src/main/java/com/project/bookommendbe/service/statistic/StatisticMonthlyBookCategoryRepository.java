@@ -1,8 +1,6 @@
-package com.project.bookommendbe.db;
+package com.project.bookommendbe.service.statistic;
 
 import com.project.bookommendbe.dto.MonthlyBookCategory;
-import com.project.bookommendbe.dto.MonthlyBookMoney;
-import com.project.bookommendbe.dto.MonthlyReadCount;
 import com.project.bookommendbe.entity.ReadingRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

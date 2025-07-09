@@ -1,9 +1,10 @@
-package com.project.bookommendbe.service.record;
+package com.project.bookommendbe.service.recordAndReview;
 
 import com.project.bookommendbe.dto.RecordAndReviewSaveVO;
 import com.project.bookommendbe.entity.User;
 import com.project.bookommendbe.entity.UserBook;
-import com.project.bookommendbe.service.review.ReviewService;
+import com.project.bookommendbe.service.recordAndReview.record.RecordService;
+import com.project.bookommendbe.service.recordAndReview.review.ReviewService;
 import com.project.bookommendbe.service.user.UserService;
 import com.project.bookommendbe.service.userbook.UserBookService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Optional;
 
 @RestController
-public class RecordController {
+public class RecordAndReviewController {
 
     private final UserService userService;
     private final RecordService recordService;
@@ -22,7 +23,7 @@ public class RecordController {
     private final ReviewService reviewService;
 
     @Autowired
-    public RecordController(UserService userService, RecordService recordService, UserBookService userBookService, ReviewService reviewService) {
+    public RecordAndReviewController(UserService userService, RecordService recordService, UserBookService userBookService, ReviewService reviewService) {
         this.userService = userService;
         this.recordService = recordService;
         this.userBookService = userBookService;
@@ -31,7 +32,6 @@ public class RecordController {
 
     @PostMapping("/c1/userBookRecordAndReview")
     public void saveReadingRecordAndReviewBy(@RequestBody RecordAndReviewSaveVO saveRequest) {
-
         Optional<User> user = userService.getUserByIdOpen(saveRequest.getUserId());
         Optional<UserBook> userBook=userBookService.saveReadBookPageCountAndStatusOpen(user.get(), saveRequest);
         reviewService.saveMyReview(userBook,saveRequest);

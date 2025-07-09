@@ -1,4 +1,4 @@
-package com.project.bookommendbe.service.record;
+package com.project.bookommendbe.service.recordAndReview.record;
 
 
 import com.project.bookommendbe.entity.ReadingRecord;
@@ -10,8 +10,6 @@ import java.util.List;
 
 @Repository
 interface RecordRepository extends JpaRepository<ReadingRecord, Long> {
-
-
 
     List<ReadingRecord> findReadingRecordsByUserAndDate(User user, String date);
 }

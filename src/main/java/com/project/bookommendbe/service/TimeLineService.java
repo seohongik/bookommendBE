@@ -2,9 +2,8 @@ package com.project.bookommendbe.service;
 
 import com.project.bookommendbe.dto.TimelineVO;
 import com.project.bookommendbe.entity.*;
-import com.project.bookommendbe.service.book.BookService;
-import com.project.bookommendbe.service.record.RecordService;
-import com.project.bookommendbe.service.review.ReviewService;
+import com.project.bookommendbe.service.recordAndReview.record.RecordService;
+import com.project.bookommendbe.service.recordAndReview.review.ReviewService;
 import com.project.bookommendbe.service.user.UserService;
 import com.project.bookommendbe.service.userbook.UserBookService;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +31,8 @@ public class TimeLineService {
         String date = pramMap.get("date");
 
         Optional<User> user = userService.getUserByIdOpen(userId);
-        List<ReadingRecord> readingRecords =recordService.findRecordByUserAndDate(user.get(),date);
-        List<Review> reviews =reviewService.findReviewsByUserAndReviewDate(user, date);
+        List<ReadingRecord> readingRecords =recordService.findRecordByUserAndDateOpen(user.get(),date);
+        List<Review> reviews =reviewService.findReviewsByUserAndReviewDateOpen(user, date);
 
         for (ReadingRecord readingRecord : readingRecords) {
 

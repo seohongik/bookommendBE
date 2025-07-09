@@ -1,4 +1,4 @@
-package com.project.bookommendbe.service.record;
+package com.project.bookommendbe.service.recordAndReview.record;
 
 import com.project.bookommendbe.entity.ReadingRecord;
 import com.project.bookommendbe.entity.User;
@@ -12,11 +12,9 @@ public abstract class RecordServiceSuper {
     protected RecordRepository recordRepository;
 
     @Autowired
-    protected RecordServiceSuper(RecordRepository recordRepository) {
+    public RecordServiceSuper(RecordRepository recordRepository) {
         this.recordRepository = recordRepository;
     }
 
-    List<ReadingRecord> findReadingRecordsByUserAndDate(User user, String date){
-        return recordRepository.findReadingRecordsByUserAndDate(user, date);
-    }
+    public abstract List<ReadingRecord> findRecordByUserAndDateOpen(User user, String date);
 }

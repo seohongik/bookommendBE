@@ -1,4 +1,4 @@
-package com.project.bookommendbe.service.record;
+package com.project.bookommendbe.service.recordAndReview.record;
 
 import com.project.bookommendbe.dto.RecordAndReviewSaveVO;
 import com.project.bookommendbe.entity.*;
@@ -11,15 +11,15 @@ import java.util.Optional;
 @Service
 public class RecordService extends RecordServiceSuper{
 
-    protected RecordRepository recordRepository;
+    private RecordRepository recordRepository;
 
+    @Autowired
     protected RecordService(RecordRepository recordRepository) {
         super(recordRepository);
+        this.recordRepository = recordRepository;
     }
 
-
     public void saveMyRecord(Optional<UserBook> userBook, RecordAndReviewSaveVO saveRequest ) {
-
         ReadingRecord readingRecord = new ReadingRecord();
         readingRecord.setUserBook(userBook.get());
         readingRecord.setUser(userBook.get().getUser());
@@ -44,7 +44,8 @@ public class RecordService extends RecordServiceSuper{
         recordRepository.save(readingRecord);
     }
 
-    public List<ReadingRecord> findRecordByUserAndDate(User user, String date) {
+    @Override
+    public List<ReadingRecord> findRecordByUserAndDateOpen(User user, String date) {
         return recordRepository.findReadingRecordsByUserAndDate(user, date);
     }
 

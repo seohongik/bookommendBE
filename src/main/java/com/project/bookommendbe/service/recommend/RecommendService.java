@@ -1,5 +1,6 @@
 package com.project.bookommendbe.service.recommend;
 
+import com.project.bookommendbe.dto.RecommendBookVO;
 import com.project.bookommendbe.entity.Book;
 import com.project.bookommendbe.entity.User;
 import com.project.bookommendbe.entity.UserBook;
@@ -31,23 +32,37 @@ public class RecommendService {
     }
 
 
-    public Map<Book,String > genreBasedRecommend(Long id) {
+    public Set<RecommendBookVO > genreBasedRecommend(Long id) {
 
         Optional<User> my = userService.getUserByIdOpen(id);
 
         List<UserBook> myBooks = userBookService.getUserBooksByUserOpen(my);
         List<UserBook> otherBooks = userBookService.findAllOpen();
 
-        Map<Book,String > recommend = new HashMap<>();
+        Set< RecommendBookVO> recommend = new HashSet<>();
         for (UserBook otherBook: otherBooks) {
             for (UserBook myBook : myBooks) {
-
                 if(myBook.getBook().getBookCategory()!=null && otherBook.getBook().getBookCategory()!=null) {
-
                     if (myBook.getBook().getBookCategory().equals(otherBook.getBook().getBookCategory())) {
+
                         Optional<Book> book=bookService.findBookByBookIsbnOpen(otherBook.getBookIsbn());
+
                         if(book.isPresent()) {
-                            recommend.put(book.get(), book.get().getImage());
+
+                            Book recommendBook = book.get();
+                            RecommendBookVO recommendBookVO = new RecommendBookVO(
+                                    recommendBook.getId()
+                                    ,recommendBook.getTitle()
+                                    , recommendBook.getAuthor()
+                                    , recommendBook.getPublisher()
+                                    , recommendBook.getBookIsbn()
+                                    , recommendBook.getCoverImageUrl()
+                                    , recommendBook.getPublishedDate()
+                                    , recommendBook.getDescription()
+                                    , recommendBook.getBookCategory().getKoreanTitle()
+                                    , recommendBook.getDiscount()
+                            );
+                            recommend.add(recommendBookVO);
                         }
                     }
                 }

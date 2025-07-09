@@ -1,8 +1,5 @@
 package com.project.bookommendbe.service.statistic;
 
-import com.project.bookommendbe.db.StatisticMonthlyBookCategoryRepository;
-import com.project.bookommendbe.db.StatisticMonthlyBookMoneyRepository;
-import com.project.bookommendbe.db.StatisticMonthlyReadCountRepository;
 import com.project.bookommendbe.dto.MonthlyBookCategory;
 import com.project.bookommendbe.dto.MonthlyBookMoney;
 import com.project.bookommendbe.dto.MonthlyReadCount;

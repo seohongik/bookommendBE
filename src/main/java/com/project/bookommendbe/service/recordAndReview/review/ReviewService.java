@@ -1,4 +1,4 @@
-package com.project.bookommendbe.service.review;
+package com.project.bookommendbe.service.recordAndReview.review;
 
 import com.project.bookommendbe.dto.RecordAndReviewSaveVO;
 import com.project.bookommendbe.entity.*;
@@ -10,19 +10,19 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class  ReviewService {
+public class  ReviewService extends ReviewServiceSuper {
 
-    private final ReviewRepository reviewRepository;
+    protected ReviewRepository reviewRepository;
 
     @Autowired
-    public ReviewService(ReviewRepository reviewRepository) {
+    ReviewService(ReviewRepository reviewRepository) {
+        super(reviewRepository);
         this.reviewRepository = reviewRepository;
     }
 
-
     // 처리할 서비스 로직 [S]
 
-    public void saveMyReview(Optional<UserBook> userBook, RecordAndReviewSaveVO saveRequest ) {
+     public void saveMyReview(Optional<UserBook> userBook, RecordAndReviewSaveVO saveRequest ) {
         Review review = new Review();
         review.setCreatedAt(LocalDateTime.now());
         review.setReviewDate(saveRequest.getRecord().getDate());
@@ -32,8 +32,8 @@ public class  ReviewService {
         reviewRepository.save(review);
     }
 
-    public List<Review> findReviewsByUserAndReviewDate(Optional<User> user, String date) {
-        //return reviewRepository.findAll(ReviewEnum.FIND_REVIEWS_BY_USER_AND_REVIEW_DATE, user, date);
+    @Override
+    public List<Review> findReviewsByUserAndReviewDateOpen(Optional<User> user, String date) {
         return reviewRepository.findReviewsByUserAndReviewDate(user.get(), date);
     }
 

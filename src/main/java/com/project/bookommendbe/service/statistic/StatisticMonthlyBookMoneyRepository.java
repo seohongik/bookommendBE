@@ -1,4 +1,4 @@
-package com.project.bookommendbe.db;
+package com.project.bookommendbe.service.statistic;
 
 import com.project.bookommendbe.dto.MonthlyBookMoney;
 import com.project.bookommendbe.entity.ReadingRecord;

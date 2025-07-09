@@ -1,4 +1,4 @@
-package com.project.bookommendbe.service.review;
+package com.project.bookommendbe.service.recordAndReview.review;
 
 
 import com.project.bookommendbe.entity.ReadingRecord;
