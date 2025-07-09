@@ -1,4 +1,4 @@
-package com.project.bookommendbe.statistic;
+package com.project.bookommendbe.service.statistic;
 
 import com.project.bookommendbe.db.StatisticMonthlyBookCategoryRepository;
 import com.project.bookommendbe.db.StatisticMonthlyBookMoneyRepository;
@@ -66,7 +66,7 @@ public class StatisticController {
             for (MonthlyBookMoney item : dbMonthlyBookMoney) {
                 if (item.getMonths().equals(String.valueOf(i))) {
                     statisticVO.setKey(item.getMonths());
-                    statisticVO.setData(String.valueOf(item.getDiscount()/10000));
+                    statisticVO.setData(String.valueOf(item.getDiscount()));
                 } else {
                     statisticVO.setKey(String.valueOf(i));
                     statisticVO.setData("0");

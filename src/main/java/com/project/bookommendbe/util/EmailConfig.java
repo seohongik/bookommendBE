@@ -1,7 +1,6 @@
 package com.project.bookommendbe.util;
 
 import com.project.bookommendbe.entity.User;
-import com.project.bookommendbe.service.user.UserService;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;

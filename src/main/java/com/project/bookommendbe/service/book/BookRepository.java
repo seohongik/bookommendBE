@@ -16,6 +16,5 @@ interface BookRepository extends JpaRepository<Book, Long> {
 
     List<Book> findBooksBySplitTitleContaining(String splitTitle);
 
-   // List<Book> findBooksByTitleContaining(String title);
 
 }

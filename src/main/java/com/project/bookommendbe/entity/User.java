@@ -12,13 +12,12 @@ import java.util.UUID;
 
 @Entity
 @Data
-@ToString(exclude = {"id", "userBook"})
+@ToString(exclude = {"id", "userBook", "reviews"})
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
 
     private String signUpId;
     private String username;

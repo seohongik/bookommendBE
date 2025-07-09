@@ -1,33 +1,44 @@
 package com.project.bookommendbe.service.userbook;
 
 import com.project.bookommendbe.dto.RecordAndReviewSaveVO;
-import com.project.bookommendbe.entity.*;
+import com.project.bookommendbe.dto.UserBookVO;
+import com.project.bookommendbe.entity.Book;
+import com.project.bookommendbe.entity.User;
+import com.project.bookommendbe.entity.UserBook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @Service
-public class UserBookService {
+public class UserBookService extends UserBookServiceSuper{
 
-    private final UserBookRepository userBookRepository;
 
+    protected UserBookRepository userBookRepository;
+
+    @Autowired
     UserBookService(UserBookRepository userBookRepository) {
+        super(userBookRepository);
         this.userBookRepository = userBookRepository;
     }
 
-
-    // 처리할 서비스 로직 [S]
-    public List<UserBook> findUserBooksByUser(User user) {
-        return userBookRepository.findUserBooksByUser(user);
+    @Override
+    public List<UserBook> getUserBooksByUserOpen(Optional<User> user) {
+        return userBookRepository.findUserBooksByUser(user.get());
     }
 
-    public void updateMyBookPageCount(User user, Long userBookId, Map<String, String> request) {
+    @Override
+    public List<UserBook> findAllOpen() {
+        return userBookRepository.findAll();
+    }
 
-        //Optional<UserBook>  userBook = userBookDAO.find(UserBookEnum.FIND_USER_BOOK_BY_ID_AND_USER, user , null, null,  userBookId );
-        Optional<UserBook> userBook = userBookRepository.findUserBookByIdAndUser(userBookId, user);
+    void updateMyBookPageCount(User user, Long userBookId, Map<String, String> request) {
+
+        Optional<UserBook> userBook = super.findUserBookByIdAndUser(userBookId, user);
 
         if(userBook.isPresent()) {
             int pageCount = Integer.parseInt(request.get("pageCount"));
@@ -39,9 +50,8 @@ public class UserBookService {
     }
 
 
-    public Optional<UserBook> saveReadBookPageCountAndStatus(User user, RecordAndReviewSaveVO saveRequest) {
-       // Optional<UserBook> userBook = userBookDAO.find(UserBookEnum.FIND_USER_BOOK_BY_ID_AND_USER, user , null, null, saveRequest.getUserBookId());
-        Optional<UserBook> userBook = userBookRepository.findUserBookByIdAndUser(saveRequest.getUserBookId(), user);
+    Optional<UserBook> saveReadBookPageCountAndStatus(User user, RecordAndReviewSaveVO saveRequest) {
+        Optional<UserBook> userBook = super.findUserBookByIdAndUser(saveRequest.getUserBookId(), user);
         userBook.get().setFromPage(saveRequest.getRecord().getFromPage());
 
         if(saveRequest.getRecord().getFromPage()==0) {
@@ -55,12 +65,10 @@ public class UserBookService {
         return userBook;
     }
 
-    public boolean existsUserBookByUserAndBookIsbn(User user, String bookIsbn) {
-        return userBookRepository.existsUserBookByUserAndBookIsbn(user, bookIsbn);
-    }
 
 
-    public void saveMyBook(boolean isOwnBook, Optional<Book> book, Optional<User> user) {
+    void saveMyBook(Optional<Book> book, Optional<User> user) {
+        boolean isOwnBook=super.existsUserBookByUserAndBookIsbn(user.get(), book.get().getBookIsbn());
         if(!isOwnBook) {
             UserBook userBook = new UserBook();
             userBook.setBook(book.get());
@@ -70,9 +78,42 @@ public class UserBookService {
         }
     }
 
-    public Optional<UserBook> getUserBookListTimeLine(User user, String bookIsbn) {
-        return userBookRepository.findUserBookByUserAndBookIsbn(user, bookIsbn);
-
+    public Optional<UserBook> getUserBookListTimeLineOpen(User user, String bookIsbn) {
+        return super.findUserBookByUserAndBookIsbn(user, bookIsbn);
     }
+
+
+    List<UserBook> getUserBooksByUser(User user) {
+        return super.findUserBooksByUser(user);
+    }
+
+
+    List<UserBookVO> getReadingUserBookList(List<UserBook> userBooks) {
+
+        List<UserBookVO> userBookReadings= new ArrayList<>();
+        for (UserBook userBook : userBooks) {
+
+            Book book = userBook.getBook();
+
+            UserBookVO userBookReadVO = new UserBookVO();
+            userBookReadVO.setBookIsbn(userBook.getBookIsbn());
+            userBookReadVO.setTitle(book.getTitle());
+            userBookReadVO.setAuthor(book.getAuthor());
+            userBookReadVO.setPublisher(book.getPublisher());
+            userBookReadVO.setCoverImageUrl(book.getCoverImageUrl());
+            userBookReadVO.setPublishedDate(book.getPublishedDate());
+            userBookReadVO.setDescription(book.getDescription());
+            userBookReadVO.setBookId(book.getId());
+            userBookReadVO.setUserBookId(userBook.getId());
+            userBookReadVO.setUserId(userBook.getUser().getId());
+            userBookReadVO.setPageCount(userBook.getPageCount());
+            userBookReadVO.setFromPage(userBook.getFromPage());
+            userBookReadings.add(userBookReadVO);
+
+        }
+        return userBookReadings;
+    }
+
+
 }
 

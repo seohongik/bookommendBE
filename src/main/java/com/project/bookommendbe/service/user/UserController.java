@@ -1,14 +1,11 @@
-package com.project.bookommendbe.user;
+package com.project.bookommendbe.service.user;
 
 import com.project.bookommendbe.dto.*;
 import com.project.bookommendbe.entity.*;
 import com.project.bookommendbe.service.TimeLineService;
-import com.project.bookommendbe.service.user.UserService;
 import com.project.bookommendbe.util.AuthNumber;
 import com.project.bookommendbe.util.EmailConfig;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -52,25 +49,6 @@ public class UserController {
 
     }
 
-    /*
-    @PutMapping("/u1/user")
-    public ResponseEntity user(@Valid @RequestBody UserUpdateVO updateVO, BindingResult bindingResult) throws NoSuchAlgorithmException {
-        StringBuilder sb = new StringBuilder();
-        if(bindingResult.hasErrors()) {
-            return isError(bindingResult, sb);
-        }
-
-        UserVO userVO = new UserVO();
-        userVO.setEmail(updateVO.getEmail());
-        userVO.setPhoneNumber(updateVO.getPhoneNumber());
-        userVO.setPassword(updateVO.getPassword());
-        userVO.setConfirmPassword(updateVO.getConfirmPassword());
-
-        userService.updatePassword(userVO);
-
-        return makeResponse( sb,new HashMap<>());
-
-    }*/
 
     @GetMapping("/r1/login")
     public ResponseEntity login(@Valid @ModelAttribute LoginVO loginVO, BindingResult bindingResult) throws NoSuchAlgorithmException {
@@ -136,7 +114,7 @@ public class UserController {
 
 
         if(user.isPresent()) {
-            StringBuilder stringBuilder = new StringBuilder();
+            //StringBuilder stringBuilder = new StringBuilder();
             int authNumber = AuthNumber.getInstance().getAuthNumber();
             Map<String, String> map = new HashMap<>();
             map.put("flag", "true");

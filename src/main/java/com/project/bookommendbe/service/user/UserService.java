@@ -9,25 +9,28 @@ import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @Slf4j
-public class UserService {
+public class UserService extends UserServiceSuper{
 
-    private final UserRepository userRepository;
+    protected UserRepository userRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    UserService(UserRepository userRepository) {
+        super(userRepository);
         this.userRepository = userRepository;
     }
 
-    public Optional<User> findUserById(long id) {
-       // return userDAO.find(UserEnum.FIND_USER_BY_ID, null,null,null,id);
-        return userRepository.findUserById(id);
+    @Override
+    public Optional<User> getUserByIdOpen(Long id) {
+        return userRepository.findById(id);
     }
 
-    public void create(UserVO userVO) throws NoSuchAlgorithmException {
+
+    void create(UserVO userVO) throws NoSuchAlgorithmException {
         User user = new User();
         user.setUsername(userVO.getUsername());
         user.setPassword(encodingInformation(userVO.getPassword()));
@@ -38,23 +41,19 @@ public class UserService {
         user.setPhoneNumber(encodingInformation(String.valueOf(userVO.getPhoneNumber())));
         user.setSignUpId(userVO.getSignUpId());
         user.setPhoneNumberTypical(userVO.getPhoneNumber());
-
-        userRepository.save(user);
+        super.userRepository.save(user);
     }
 
 
-    public Optional<User> findUserByEmailAndPhoneNumber(UserVO userVO) throws NoSuchAlgorithmException {
-
+     Optional<User> findUserByEmailAndPhoneNumber(UserVO userVO) throws NoSuchAlgorithmException {
         String[] param = {userVO.getEmail(), encodingInformation(userVO.getPhoneNumber())};
-        Optional<User> user=userRepository.findUserByEmailAndPhoneNumber(param[0], param[1]);
+        Optional<User> user=super.findUserByEmailAndPhoneNumber(param[0], param[1]);
         return user;
-
     }
 
-    public Optional<User> findUserByEmailAndPassword(UserVO loginVO) throws NoSuchAlgorithmException {
+     Optional<User> findUserByEmailAndPassword(UserVO loginVO) throws NoSuchAlgorithmException {
         String[] param = {loginVO.getEmail(), encodingInformation(loginVO.getPassword())};
-        //Optional<User> user=userDAO.find(UserEnum.FIND_USER_BY_EMAIL_AND_PASSWORD,null, null, param, null);
-        Optional<User> user=userRepository.findUserByEmailAndPassword(param[0], param[1]);
+        Optional<User> user=super.findUserByEmailAndPassword(param[0], param[1]);
         if(user.isPresent()){
             return user;
         }else {
@@ -62,10 +61,9 @@ public class UserService {
         }
     }
 
-    public Optional<User> findUserBySignUpIdAndPhoneNumber(UserVO userFindVO) throws NoSuchAlgorithmException {
+     Optional<User> findUserBySignUpIdAndPhoneNumber(UserVO userFindVO) throws NoSuchAlgorithmException {
         String[] param = {userFindVO.getSignUpId(),encodingInformation(userFindVO.getPhoneNumber())};
-        Optional<User> user=userRepository.findUserBySignUpIdAndPhoneNumber(param[0], param[1]);
-
+        Optional<User> user=super.findUserBySignUpIdAndPhoneNumber(param[0], param[1]);
         if(user.isPresent()){
             return user;
         }else {
@@ -73,40 +71,37 @@ public class UserService {
         }
     }
 
-
-    // 처리할 서비스 로직 [S]
     private String  encodingInformation(String information) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(information.getBytes());
         return DatatypeConverter.printHexBinary(md.digest());
     }
 
-    public void updatePassword(UserVO uservo) throws NoSuchAlgorithmException {
-
-        Optional<User> user = userRepository.findUserByEmailAndPhoneNumberAndPasswordAuthNumber(uservo.getEmail(), encodingInformation(uservo.getPhoneNumber()), uservo.getAuthNumber());
+    void updatePassword(UserVO uservo) throws NoSuchAlgorithmException {
+        Optional<User> user = super.findUserByEmailAndPhoneNumberAndPasswordAuthNumber(uservo.getEmail(), encodingInformation(uservo.getPhoneNumber()), uservo.getAuthNumber());
         if(user.isPresent()) {
             user.get().setPassword(encodingInformation(uservo.getPassword()));
             user.get().setConfirmPassword(encodingInformation(uservo.getConfirmPassword()));
-            userRepository.save(user.get());
+            super.userRepository.save(user.get());
         }
     }
 
 
-    public void changePasswordEmptyAndMakeAuthNumber(UserVO userVO,int authNumber) throws NoSuchAlgorithmException {
-        Optional<User> user=userRepository.findUserByEmailAndPhoneNumber(userVO.getEmail(), encodingInformation(userVO.getPhoneNumber()));
+    void changePasswordEmptyAndMakeAuthNumber(UserVO userVO,int authNumber) throws NoSuchAlgorithmException {
+        Optional<User> user=super.findUserByEmailAndPhoneNumber(userVO.getEmail(), encodingInformation(userVO.getPhoneNumber()));
         if(user.isPresent()) {
             user.get().setPassword("");
             user.get().setConfirmPassword("");
             user.get().setPasswordAuthNumber(authNumber);
-            userRepository.save(user.get());
+            super.userRepository.save(user.get());
         }
     }
 
-    public boolean verify(UserVO userVO) throws NoSuchAlgorithmException {
-
-        Optional<User> user=userRepository.findUserByEmailAndPhoneNumberAndPasswordAuthNumber(userVO.getEmail(), encodingInformation(userVO.getPhoneNumber()), userVO.getAuthNumber());
+    boolean verify(UserVO userVO) throws NoSuchAlgorithmException {
+        Optional<User> user=super.userRepository.findUserByEmailAndPhoneNumberAndPasswordAuthNumber(userVO.getEmail(), encodingInformation(userVO.getPhoneNumber()), userVO.getAuthNumber());
         return user.isPresent();
     }
+
 }
 
 

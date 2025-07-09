@@ -20,7 +20,6 @@ import java.util.Optional;
 public class TimeLineService {
 
     private final UserService userService;
-    private final BookService bookService;
     private final UserBookService userBookService;
     private final ReviewService reviewService;
     private final RecordService recordService;
@@ -32,13 +31,13 @@ public class TimeLineService {
         long userId = Long.parseLong(pramMap.get("userId"));
         String date = pramMap.get("date");
 
-        Optional<User> user = userService.findUserById(userId);
+        Optional<User> user = userService.getUserByIdOpen(userId);
         List<ReadingRecord> readingRecords =recordService.findRecordByUserAndDate(user.get(),date);
         List<Review> reviews =reviewService.findReviewsByUserAndReviewDate(user, date);
 
         for (ReadingRecord readingRecord : readingRecords) {
 
-            Optional<UserBook> userBookOptional = userBookService.getUserBookListTimeLine(user.get(), readingRecord.getBookIsbn());
+            Optional<UserBook> userBookOptional = userBookService.getUserBookListTimeLineOpen(user.get(), readingRecord.getBookIsbn());
 
             UserBook userBook = userBookOptional.get();
             if(userBook.getBook().getBookIsbn().equals(readingRecord.getBookIsbn())) {

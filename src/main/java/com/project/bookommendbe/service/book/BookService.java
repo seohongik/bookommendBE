@@ -14,74 +14,67 @@ import org.springframework.util.MultiValueMap;
 
 import java.util.*;
 
-@Service
 @Slf4j
-public class BookService {
+@Service
+public class BookService extends BookServiceSuper {
 
-    private final BookRepository bookRepository;
-
-    @Autowired
     public BookService(BookRepository bookRepository) {
-        this.bookRepository =bookRepository;
+        super(bookRepository);
+    }
+
+    @Override
+    public Optional<Book> findBookByBookIsbnOpen(String isbn) {
+        return super.findBookByBookIsbn(isbn);
     }
 
 
     // 처리할 서비스 로직 [S]
-    public List<BookVO> findSavedBook(List<BookVO> showableBooks, MultiValueMap<String, String> paramMap) {
-
-        List<Book> books=bookRepository.findBooksBySplitTitleContaining(split(paramMap.get("query").toString()));
-
+    List<BookVO> findSavedBook(List<BookVO> showableBooks, MultiValueMap<String, String> paramMap) {
+        List<Book> books=super.findBooksBySplitTitleContaining(split(paramMap.get("query").toString()));
         if (books != null && !books.isEmpty()) {
             makeDisplayBooks(showableBooks, books);
         }
-
         return showableBooks;
 
     }
 
-
-    public void saveApiNAVERBooks(List<Item> items) {
-
-            for (Item item : items) {
-                //Optional<Book> isOwnIsbnBook = b.find(BookEnum.FIND_BOOK_BY_BOOK_ISBN, null, item.getIsbn(), null, null);
-
-                Optional<Book> isOwnIsbnBook = bookRepository.findBookByBookIsbn(item.getIsbn());
-
-                if (isOwnIsbnBook.isEmpty() || !isOwnIsbnBook.get().getBookIsbn().equals(item.getIsbn())) {
-
-                    Book saveBook = new Book();
-                    saveBook.setCoverImageUrl(item.getImage());
-                    saveBook.setAuthor(item.getAuthor());
-                    saveBook.setBookIsbn(item.getIsbn());
-                    saveBook.setTitle(item.getTitle());
-                    saveBook.setDescription(item.getDescription());
-                    saveBook.setPublisher(item.getPublisher());
-                    saveBook.setSplitTitle(split(item.getTitle()));
-                    saveBook.setPublishedDate(item.getPubdate());
-                    saveBook.setPublishedDate(item.getPubdate());
-                    saveBook.setDiscount(String.valueOf(item.getDiscount()));
-                    bookRepository.save(saveBook);
-                }
+    void saveApiNAVERBooks(List<Item> items) {
+        for (Item item : items) {
+            Optional<Book> isOwnIsbnBook = super.findBookByBookIsbn(item.getIsbn());
+            if (isOwnIsbnBook.isEmpty() || !isOwnIsbnBook.get().getBookIsbn().equals(item.getIsbn())) {
+                Book saveBook = new Book();
+                saveBook.setCoverImageUrl(item.getImage());
+                saveBook.setAuthor(item.getAuthor());
+                saveBook.setBookIsbn(item.getIsbn());
+                saveBook.setTitle(item.getTitle());
+                saveBook.setDescription(item.getDescription());
+                saveBook.setPublisher(item.getPublisher());
+                saveBook.setSplitTitle(split(item.getTitle()));
+                saveBook.setPublishedDate(item.getPubdate());
+                saveBook.setPublishedDate(item.getPubdate());
+                saveBook.setDiscount(String.valueOf(item.getDiscount()));
+                super.save(saveBook);
             }
+        }
     }
 
-    public void saveApiCategoryBooks(List<Doc> docs,Optional<Book> book) {
+    void saveApiCategoryBooks(List<Doc> docs, String bookIsbn) {
 
+        Optional<Book> book=super.findBookByBookIsbn(bookIsbn);
         if(book.isPresent()) {
             for (Doc doc : docs) {
                 book.get().setBookCategory(BookCategory.fromCode(doc.getSubject()));
-                bookRepository.save(book.get());
+                super.save(book.get());
             }
         }
-
     }
 
-    public Optional<Book> getBookByIsbn(String bookIsbn) {
-        Optional<Book> book = bookRepository.findBookByBookIsbn(bookIsbn);
+    Optional<Book> getBookByIsbn(String bookIsbn) {
+        Optional<Book> book = super.findBookByBookIsbn(bookIsbn);
         return book;
     }
 
-    private void  makeDisplayBooks(List<BookVO> showableBook, List<Book> apiBooks) {
+    void  makeDisplayBooks(List<BookVO> showableBook, List<Book> apiBooks) {
         for (Book item : apiBooks) {
             BookVO showBook = new BookVO();
             showBook.setId(item.getId());
@@ -95,39 +88,6 @@ public class BookService {
             showableBook.add(showBook);
         }
     }
-
-    public List<UserBookVO> getReadingUserBookList(List<UserBook> userBooks) {
-
-        List<UserBookVO> userBookReads = new ArrayList<>();
-        for (UserBook userBook : userBooks) {
-
-           // Optional<Book> book = bookDAO.find(BookEnum.FIND_BOOK_BY_BOOK_ISBN,null, userBook.getBookIsbn(), null,null);
-
-            Optional<Book> book = bookRepository.findBookByBookIsbn(userBook.getBookIsbn());
-
-            if(book.isPresent()) {
-                UserBookVO userBookReadVO = new UserBookVO();
-                userBookReadVO.setBookIsbn(userBook.getBookIsbn());
-                userBookReadVO.setTitle(book.get().getTitle());
-                userBookReadVO.setAuthor(book.get().getAuthor());
-                userBookReadVO.setPublisher(book.get().getPublisher());
-                userBookReadVO.setCoverImageUrl(book.get().getCoverImageUrl());
-                userBookReadVO.setPublishedDate(book.get().getPublishedDate());
-                userBookReadVO.setDescription(book.get().getDescription());
-                userBookReadVO.setBookId(book.get().getId());
-                userBookReadVO.setUserBookId(userBook.getId());
-                userBookReadVO.setUserId(userBook.getUser().getId());
-                userBookReadVO.setPageCount(userBook.getPageCount());
-                userBookReadVO.setFromPage(userBook.getFromPage());
-
-                userBookReads.add(userBookReadVO);
-
-            }
-        }
-        return userBookReads;
-    }
-
-    // 처리할 서비스 로직 [E]
 
     private String split(String query) {
         query=query.replaceAll("[^가-힣]", "");
@@ -144,10 +104,9 @@ public class BookService {
             char jongsung = (char)(keywordUniBase % 28);
             result += chosungs[chosung] + jungsungs[jungsung] + jongsungs[jongsung];
         }
-
         return result;
-
     }
+
 }
 
 
