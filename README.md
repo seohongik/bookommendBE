@@ -1,6 +1,6 @@
 # bookommendBE
 
-접근제어자와 상속구조로 SERVICE DATA DREVEN DEVELOPMENT 완료 
+접근제어자와 상속구조로 SERVICE DATA DRIVEN DEVELOPMENT 완료 
 
 1. 아키텍처
 pagkage 
