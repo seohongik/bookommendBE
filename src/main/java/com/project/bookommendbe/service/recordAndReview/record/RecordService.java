@@ -11,7 +11,7 @@ import java.util.Optional;
 @Service
 public class RecordService extends RecordServiceSuper{
 
-    private RecordRepository recordRepository;
+    protected final RecordRepository recordRepository;
 
     @Autowired
     protected RecordService(RecordRepository recordRepository) {

@@ -7,6 +7,8 @@ import com.project.bookommendbe.dto.api.naver.Item;
 import com.project.bookommendbe.entity.Book;
 import com.project.bookommendbe.entity.BookCategory;
 import com.project.bookommendbe.entity.UserBook;
+import com.project.bookommendbe.service.userbook.UserBookService;
+import com.project.bookommendbe.service.userbook.UserBookServiceSuper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,13 +20,19 @@ import java.util.*;
 @Service
 public class BookService extends BookServiceSuper {
 
-    public BookService(BookRepository bookRepository) {
+    private final BookRepository bookRepository;
+    private final UserBookService userBookService;
+
+    @Autowired
+    public BookService(BookRepository bookRepository, UserBookService userBookService) {
         super(bookRepository);
+        this.bookRepository = bookRepository;
+        this.userBookService = userBookService;
     }
 
     @Override
     public Optional<Book> findBookByBookIsbnOpen(String isbn) {
-        return super.findBookByBookIsbn(isbn);
+        return bookRepository.findBookByBookIsbn(isbn);
     }
 
 
@@ -53,26 +61,28 @@ public class BookService extends BookServiceSuper {
                 saveBook.setPublishedDate(item.getPubdate());
                 saveBook.setPublishedDate(item.getPubdate());
                 saveBook.setDiscount(String.valueOf(item.getDiscount()));
-                super.save(saveBook);
+                bookRepository.save(saveBook);
             }
         }
     }
 
     void saveApiCategoryBooks(List<Doc> docs, String bookIsbn) {
 
-        Optional<Book> book=super.findBookByBookIsbn(bookIsbn);
+        Optional<Book> book=bookRepository.findBookByBookIsbn(bookIsbn);
         if(book.isPresent()) {
             for (Doc doc : docs) {
                 book.get().setBookCategory(BookCategory.fromCode(doc.getSubject()));
-                super.save(book.get());
+                bookRepository.save(book.get());
+
             }
         }
     }
 
+    /*
     Optional<Book> getBookByIsbn(String bookIsbn) {
-        Optional<Book> book = super.findBookByBookIsbn(bookIsbn);
+        Optional<Book> book = bookRepository.findBookByBookIsbn(bookIsbn);
         return book;
-    }
+    }*/
 
     void  makeDisplayBooks(List<BookVO> showableBook, List<Book> apiBooks) {
         for (Book item : apiBooks) {

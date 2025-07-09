@@ -12,7 +12,7 @@ import java.util.Optional;
 @Service
 public class  ReviewService extends ReviewServiceSuper {
 
-    protected ReviewRepository reviewRepository;
+    protected final ReviewRepository reviewRepository;
 
     @Autowired
     ReviewService(ReviewRepository reviewRepository) {

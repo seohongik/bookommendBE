@@ -66,6 +66,11 @@ public class UserBookService extends UserBookServiceSuper{
         return userBook;
     }
 
+    @Override
+    public void saveCategoryBookOpen(Book book) {
+        System.out.println("UserBookService.saveCategoryBookOpen");
+        userBookRepository.saveAll(book.getUserBooks());
+    }
 
 
     void saveMyBook(Optional<Book> book, Optional<User> user) {

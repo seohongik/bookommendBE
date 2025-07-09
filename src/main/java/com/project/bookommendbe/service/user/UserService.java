@@ -16,7 +16,7 @@ import java.util.Optional;
 @Slf4j
 public class UserService extends UserServiceSuper{
 
-    protected UserRepository userRepository;
+    protected final UserRepository userRepository;
 
     @Autowired
     UserService(UserRepository userRepository) {
@@ -41,7 +41,7 @@ public class UserService extends UserServiceSuper{
         user.setPhoneNumber(encodingInformation(String.valueOf(userVO.getPhoneNumber())));
         user.setSignUpId(userVO.getSignUpId());
         user.setPhoneNumberTypical(userVO.getPhoneNumber());
-        super.userRepository.save(user);
+        userRepository.save(user);
     }
 
 
@@ -82,7 +82,7 @@ public class UserService extends UserServiceSuper{
         if(user.isPresent()) {
             user.get().setPassword(encodingInformation(uservo.getPassword()));
             user.get().setConfirmPassword(encodingInformation(uservo.getConfirmPassword()));
-            super.userRepository.save(user.get());
+            userRepository.save(user.get());
         }
     }
 
@@ -93,12 +93,12 @@ public class UserService extends UserServiceSuper{
             user.get().setPassword("");
             user.get().setConfirmPassword("");
             user.get().setPasswordAuthNumber(authNumber);
-            super.userRepository.save(user.get());
+            userRepository.save(user.get());
         }
     }
 
     boolean verify(UserVO userVO) throws NoSuchAlgorithmException {
-        Optional<User> user=super.userRepository.findUserByEmailAndPhoneNumberAndPasswordAuthNumber(userVO.getEmail(), encodingInformation(userVO.getPhoneNumber()), userVO.getAuthNumber());
+        Optional<User> user=userRepository.findUserByEmailAndPhoneNumberAndPasswordAuthNumber(userVO.getEmail(), encodingInformation(userVO.getPhoneNumber()), userVO.getAuthNumber());
         return user.isPresent();
     }
 

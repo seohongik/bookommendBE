@@ -9,9 +9,8 @@ import java.util.List;
 public abstract class RecordServiceSuper {
 
 
-    protected RecordRepository recordRepository;
+    protected final RecordRepository recordRepository;
 
-    @Autowired
     public RecordServiceSuper(RecordRepository recordRepository) {
         this.recordRepository = recordRepository;
     }

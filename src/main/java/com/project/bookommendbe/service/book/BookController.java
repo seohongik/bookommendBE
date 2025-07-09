@@ -4,7 +4,9 @@ import com.project.bookommendbe.dto.BookVO;
 import com.project.bookommendbe.dto.UserBookSaveVO;
 import com.project.bookommendbe.dto.api.library.Result;
 import com.project.bookommendbe.dto.api.naver.Channel;
+import com.project.bookommendbe.entity.Book;
 import com.project.bookommendbe.service.RestTempService;
+import com.project.bookommendbe.service.userbook.UserBookService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,18 +17,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
 @Slf4j
 public class BookController {
 
+    private final UserBookService userBookService;
     @Value("${naver.clientId}")
     private String clientId;
 
@@ -38,12 +39,14 @@ public class BookController {
 
 
     private final RestTempService restTempService;
-
     private final BookService bookService;
+
+
     @Autowired
-    public BookController(RestTempService restTempService, BookService bookService) {
+    public BookController(RestTempService restTempService, BookService bookService, UserBookService userBookService) {
         this.restTempService = restTempService;
         this.bookService = bookService;
+        this.userBookService = userBookService;
     }
 
 
@@ -73,9 +76,10 @@ public class BookController {
 
 
 
-    @PostMapping("/c1/userBook") // uri 바꿔야함
-    public String insertUserBookAndBookCategoryBy( @RequestBody UserBookSaveVO request) throws MalformedURLException {
+    @GetMapping("/c1/userBook") // uri 바꿔야함
+    public String insertUserBookAndBookCategoryBy(@ModelAttribute UserBookSaveVO request, RedirectAttributes redirectAttributes) throws MalformedURLException {
 
+        log.error("insertUserBookAndBookCategoryBy:{}",request);
         MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
 
         String url = "https://www.nl.go.kr";
@@ -92,10 +96,9 @@ public class BookController {
         if(response.getBody().getDocs()!=null) {
             bookService.saveApiCategoryBooks(response.getBody().getDocs(), request.getBookIsbn());
         }
+        redirectAttributes.addFlashAttribute("request", request);
 
-        //userBookService.saveMyBook(isOwnBook, book, user);
+        return "redirect:/p1/saveUserBook";
 
-        // }
-        return "redirect:/c1/saveUserBook";
     }
 }

@@ -1,6 +1,7 @@
 package com.project.bookommendbe.service.userbook;
 
 import com.project.bookommendbe.dto.RecordAndReviewSaveVO;
+import com.project.bookommendbe.entity.Book;
 import com.project.bookommendbe.entity.User;
 import com.project.bookommendbe.entity.UserBook;
 
@@ -38,4 +39,6 @@ public abstract class UserBookServiceSuper {
     public abstract List<UserBook> findAllOpen();
 
     public abstract  Optional<UserBook> saveReadBookPageCountAndStatusOpen(User user, RecordAndReviewSaveVO saveRequest);
+
+    public abstract void saveCategoryBookOpen(Book book);
 }

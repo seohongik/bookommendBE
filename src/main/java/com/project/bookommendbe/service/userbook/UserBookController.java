@@ -50,12 +50,14 @@ public class UserBookController {
 
     }
 
-    @PostMapping("/c1/saveUserBook")
-    public void insertUserBookBy(UserBookSaveVO request) {
+    @GetMapping("/p1/saveUserBook")
+    public void insertUserBookBy( @ModelAttribute("request") UserBookSaveVO request) {
+        log.info("UserBookController.insertUserBookBy:{}", request);
         Optional<User> user = userService.getUserByIdOpen(request.getUserId());
         Optional<Book >book = bookService.findBookByBookIsbnOpen(request.getBookIsbn());
         userBookService.saveMyBook(book, user);
     }
+
 
     @PutMapping("/u1/userBookPageCount/{userId}/{userBookId}")
     public void updateUserBookPageCountBy(@PathVariable Long userId, @PathVariable Long userBookId, @RequestBody Map<String,String> request) {
