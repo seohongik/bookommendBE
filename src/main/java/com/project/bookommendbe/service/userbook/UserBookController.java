@@ -63,12 +63,4 @@ public class UserBookController {
         userBookService.updateMyBookPageCount(user.get(),userBookId,request);
     }
 
-    @PostMapping("/c1/userBookRecordAndReview")
-    public void saveReadingRecordAndReviewBy(@RequestBody RecordAndReviewSaveVO saveRequest) {
-
-        Optional<User> user = userService.getUserByIdOpen(saveRequest.getUserId());
-        Optional<UserBook> userBook=userBookService.saveReadBookPageCountAndStatus(user.get(), saveRequest);
-        reviewService.saveMyReview(userBook,saveRequest);
-        recordService.saveMyRecord(userBook, saveRequest);
-    }
 }

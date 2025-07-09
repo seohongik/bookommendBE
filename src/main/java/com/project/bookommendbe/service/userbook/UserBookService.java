@@ -50,7 +50,8 @@ public class UserBookService extends UserBookServiceSuper{
     }
 
 
-    Optional<UserBook> saveReadBookPageCountAndStatus(User user, RecordAndReviewSaveVO saveRequest) {
+    @Override
+    public Optional<UserBook> saveReadBookPageCountAndStatusOpen(User user, RecordAndReviewSaveVO saveRequest) {
         Optional<UserBook> userBook = super.findUserBookByIdAndUser(saveRequest.getUserBookId(), user);
         userBook.get().setFromPage(saveRequest.getRecord().getFromPage());
 

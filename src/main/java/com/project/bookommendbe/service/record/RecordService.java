@@ -9,17 +9,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class RecordService {
+public class RecordService extends RecordServiceSuper{
 
-    private final RecordRepository recordRepository;
+    protected RecordRepository recordRepository;
 
-    @Autowired
-    public RecordService(RecordRepository recordRepository) {
-        this.recordRepository = recordRepository;
+    protected RecordService(RecordRepository recordRepository) {
+        super(recordRepository);
     }
 
-
-    // 처리할 서비스 로직 [S]
 
     public void saveMyRecord(Optional<UserBook> userBook, RecordAndReviewSaveVO saveRequest ) {
 
@@ -48,22 +45,8 @@ public class RecordService {
     }
 
     public List<ReadingRecord> findRecordByUserAndDate(User user, String date) {
-        //return recordRepository.findAll(RecordEnum.FIND_READING_RECORDS_BY_USER_AND_DATE, user, date);
         return recordRepository.findReadingRecordsByUserAndDate(user, date);
     }
-
-    /*
-    @Override
-    public List<String> findBookIsbn(List<ReadingRecord> readingRecords) {
-
-        List<String> bookIsbns = new ArrayList<>();
-
-        for (ReadingRecord readingRecord : readingRecords) {
-            bookIsbns.add(readingRecord.getBookIsbn());
-        }
-        return bookIsbns;
-    }*/
-
 
 }
 
