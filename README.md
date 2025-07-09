@@ -7,11 +7,11 @@ pagkage
   - service  (defualt)
   - controller (public)
   - repository (defualt)
-  - serviceSuper (public)
+  - serviceSuper (abstract public)
   
   구조로 하였고, serviceSuper에서는 다른 서비스에서 참조할 수 있겠끔(디비조회 가능하게끔) 로직 없이 repository 데이터 리턴함 
   
-이유 - repository public (하지만 이건 인텔리제이에서도 노란줄 침) 으로 하는게 객체지향에서 맞나 생각들어서 (금고를 모두에게 공개 열어두진 않으니까)
+이유 - repository public 으로 하는게 객체지향에서 맞나 생각들어서 (금고를 모두에게 공개 열어두진 않으니까) (하지만 이건 인텔리제이에서도 노란줄 침)
   
 단테 회귀 테스트 다시 해봐야함 
   
