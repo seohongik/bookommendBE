@@ -33,19 +33,26 @@ public class UserController {
     }
 
     @PostMapping("/c1/user")
-    public ResponseEntity userCreate( @Valid @RequestBody UserVO userVO, BindingResult bindingResult) throws NoSuchAlgorithmException {
+    public ResponseEntity userCreate( @Valid @RequestBody UserVO userVO, BindingResult bindingResult) throws NoSuchAlgorithmException, UserException {
 
-        StringBuilder sb = new StringBuilder();
-        isError(bindingResult, sb);
-        System.out.println( isError(bindingResult, sb));
 
+        UserException userCreate = userService.create(userVO);
         if(!bindingResult.hasErrors()) {
-            userService.create(userVO);
+            StringBuilder sb = new StringBuilder();
+            if(userCreate==null) {
+                Map<String, String> map = new HashMap<>();
+                map.put("msg", "회원가입 완료");
+                return makeResponse(sb, map);
+            }else {
+                try {
+                    throw userCreate;
+                }catch (UserException e) {
+                    return isError(bindingResult, new StringBuilder(e.getMessage()));
+                }
+            }
         }else {
-            return isError(bindingResult, sb);
+            return isError(bindingResult, new StringBuilder("회원가입 실패"));
         }
-
-        return makeResponse(sb, new HashMap<>());
 
     }
 
@@ -154,6 +161,7 @@ public class UserController {
     }
 
     private ResponseEntity makeResponse( StringBuilder message, Map<String,String> value) {
+
 
         if(!value.isEmpty()){
             return ResponseEntity.status(HttpStatus.OK).body(value);

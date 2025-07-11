@@ -4,12 +4,12 @@ import com.project.bookommendbe.dto.*;
 import com.project.bookommendbe.entity.User;
 import jakarta.xml.bind.DatatypeConverter;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.NonUniqueResultException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -30,7 +30,7 @@ public class UserService extends UserServiceSuper{
     }
 
 
-    void create(UserVO userVO) throws NoSuchAlgorithmException {
+    UserException create(UserVO userVO) throws NoSuchAlgorithmException {
         User user = new User();
         user.setUsername(userVO.getUsername());
         user.setPassword(encodingInformation(userVO.getPassword()));
@@ -41,7 +41,19 @@ public class UserService extends UserServiceSuper{
         user.setPhoneNumber(encodingInformation(String.valueOf(userVO.getPhoneNumber())));
         user.setSignUpId(userVO.getSignUpId());
         user.setPhoneNumberTypical(userVO.getPhoneNumber());
-        userRepository.save(user);
+
+        try {
+            Optional<User> check=userRepository.findUserByEmailOrPhoneNumber(userVO.getEmail(), encodingInformation(userVO.getPhoneNumber()));
+            if(check.isEmpty()) {
+                userRepository.save(user);
+            }else {
+                return new UserException("Email or Phone Number is already in use");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 

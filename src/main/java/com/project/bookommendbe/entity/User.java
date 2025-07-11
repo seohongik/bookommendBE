@@ -21,7 +21,10 @@ public class User {
 
     private String signUpId;
     private String username;
+
+    @Column(unique = true)
     private String email;
+
     private String password;
     private String confirmPassword;
 
@@ -29,8 +32,11 @@ public class User {
     private String  dateOfBirth;
 
     private String gender;
+
+    @Column(unique = true)
     private String phoneNumber;
 
+    @Column(unique = true)
     private String phoneNumberTypical;
 
     private LocalDate createdAt;

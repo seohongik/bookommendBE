@@ -14,7 +14,6 @@ public abstract class UserServiceSuper {
         this.userRepository = userRepository;
     }
 
-
     Optional<User> findUserByEmailAndPassword( String email, String password){
         return userRepository.findUserByEmailAndPassword(email, password);
     };
