@@ -16,15 +16,6 @@ public abstract class BookServiceSuper {
         this.bookRepository = bookRepository;
     }
 
-
-    Optional<Book> findBookByBookIsbn(String isbn){
-      return   bookRepository.findBookByBookIsbn(isbn);
-    }
-
-    List<Book> findBooksBySplitTitleContaining(String splitTitle){
-      return   bookRepository.findBooksBySplitTitleContaining(splitTitle);
-    }
-
     public abstract Optional<Book> findBookByBookIsbnOpen(String isbn);
 
 
