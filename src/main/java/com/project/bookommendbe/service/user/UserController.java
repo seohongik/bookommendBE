@@ -115,7 +115,7 @@ public class UserController {
 
         if(user.isPresent()) {
             //StringBuilder stringBuilder = new StringBuilder();
-            int authNumber = AuthNumber.getInstance().getAuthNumber();
+            int authNumber = new AuthNumber().getNumber();
             Map<String, String> map = new HashMap<>();
             map.put("flag", "true");
             map.put("message", "이메일을 확인해주세요");
