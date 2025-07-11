@@ -20,14 +20,12 @@ import java.util.*;
 @Service
 public class BookService extends BookServiceSuper {
 
-    private final BookRepository bookRepository;
-    private final UserBookService userBookService;
+    protected final BookRepository bookRepository;
 
     @Autowired
-    public BookService(BookRepository bookRepository, UserBookService userBookService) {
+    public BookService(BookRepository bookRepository) {
         super(bookRepository);
         this.bookRepository = bookRepository;
-        this.userBookService = userBookService;
     }
 
     @Override
@@ -35,20 +33,17 @@ public class BookService extends BookServiceSuper {
         return bookRepository.findBookByBookIsbn(isbn);
     }
 
-
-    // 처리할 서비스 로직 [S]
     List<BookVO> findSavedBook(List<BookVO> showableBooks, MultiValueMap<String, String> paramMap) {
-        List<Book> books=super.findBooksBySplitTitleContaining(split(paramMap.get("query").toString()));
+        List<Book> books=bookRepository.findBooksBySplitTitleContaining(split(paramMap.get("query").toString()));
         if (books != null && !books.isEmpty()) {
             makeDisplayBooks(showableBooks, books);
         }
         return showableBooks;
-
     }
 
     void saveApiNAVERBooks(List<Item> items) {
         for (Item item : items) {
-            Optional<Book> isOwnIsbnBook = super.findBookByBookIsbn(item.getIsbn());
+            Optional<Book> isOwnIsbnBook = bookRepository.findBookByBookIsbn(item.getIsbn());
             if (isOwnIsbnBook.isEmpty() || !isOwnIsbnBook.get().getBookIsbn().equals(item.getIsbn())) {
                 Book saveBook = new Book();
                 saveBook.setCoverImageUrl(item.getImage());
@@ -77,12 +72,6 @@ public class BookService extends BookServiceSuper {
             }
         }
     }
-
-    /*
-    Optional<Book> getBookByIsbn(String bookIsbn) {
-        Optional<Book> book = bookRepository.findBookByBookIsbn(bookIsbn);
-        return book;
-    }*/
 
     void  makeDisplayBooks(List<BookVO> showableBook, List<Book> apiBooks) {
         for (Book item : apiBooks) {

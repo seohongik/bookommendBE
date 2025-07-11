@@ -92,7 +92,6 @@ public class BookController {
 
         ResponseEntity<Result> response = restTempService.response(url, path, paramMap, null, HttpMethod.GET, Result.class);
 
-        log.error(response.getBody().toString());
         if(response.getBody().getDocs()!=null) {
             bookService.saveApiCategoryBooks(response.getBody().getDocs(), request.getBookIsbn());
         }
