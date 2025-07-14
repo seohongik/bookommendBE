@@ -21,6 +21,7 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -38,6 +39,10 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.0'
     implementation group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.2'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.apache.opennlp:opennlp-tools:2.2.0' // 최신 버전 권장
+    implementation 'org.jsoup:jsoup:1.16.1'
+    implementation group: 'org.apache.solr', name: 'solr-api', version: '9.8.1'
+    implementation 'com.github.shin285:KOMORAN:3.3.9'
 }
 
 tasks.named('test') {
