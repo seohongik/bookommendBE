@@ -9,10 +9,10 @@ QNA / TAG 컨트롤러 (서비스) 만듬 형태소 분절-> 명사 추출 -> �
 
 1-> 그래서 링크를 첨부했다 
 
-![검색결과](Images/search.png)
 
-![검색결과2](Images/search2.png)
+<img src="Images/search.png" width="200" />
 
+<img src="Images/search2.png" width="200" />
 
 
 1. 아키텍처
