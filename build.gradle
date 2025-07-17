@@ -43,6 +43,11 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.16.1'
     implementation group: 'org.apache.solr', name: 'solr-api', version: '9.8.1'
     implementation 'com.github.shin285:KOMORAN:3.3.9'
+    // Selenium Java
+    implementation 'org.seleniumhq.selenium:selenium-java:4.21.0'
+
+    // WebDriver Manager (자동으로 크롬드라이버 설정해줌)
+    implementation 'io.github.bonigarcia:webdrivermanager:5.8.0'
 }
 
 tasks.named('test') {

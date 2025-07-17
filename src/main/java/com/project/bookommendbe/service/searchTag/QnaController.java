@@ -1,12 +1,16 @@
 package com.project.bookommendbe.service.searchTag;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import kr.co.shineware.nlp.komoran.constant.DEFAULT_MODEL;
 import kr.co.shineware.nlp.komoran.core.Komoran;
 import kr.co.shineware.nlp.komoran.model.Token;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,11 +19,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-public class TagController {
+public class QnaController {
 
-    // 서비스 로직으로 뺄꺼도 DB에도 넣고 entity도 만들 예정
-    @GetMapping("/r1/tag")
-    public List<String> getTags(@RequestParam String title, @RequestParam String body) {
+    @GetMapping("/r1/qna")
+
+    public List<String> qna(@RequestParam  String title, @RequestParam  String body ) {
+        //String bookTitleQuery = "뉴욕3부작";
+        //String queryBody = "내용이 뭐지?";
+
+        //String bookTitleQuery = "슈퍼맨";
+        //String queryBody = "내용이 뭐지?";
+
 
         List<String> querys = getKeyword(body);
 
@@ -39,73 +49,59 @@ public class TagController {
                 bookTitleBuilder.append("+");
             }
         }
-
-        String bookTitle = bookTitleBuilder.toString();
         try {
-            Deque<String> findWord = new ArrayDeque<>();
-            Deque<String> queries = new ArrayDeque<>();
 
-            queries.addFirst(bookTitle);
-            for (String query : querys) {
-                findWord.addFirst(query);
-            }
+            WebDriverManager.chromedriver().setup();
 
+            ChromeOptions options = new ChromeOptions();
 
-            List<String> bodys = new ArrayList<>();
-            // URL에서 문서 가져오기 (기본 GET 요청)
-            while (!queries.isEmpty()) {
-                Document doc = Jsoup.connect("https://search.naver.com/search.naver?query=" + queries.poll()).get();
-                Elements elements = doc.getElementsByTag("a");
-                //Elements elements = doc.getAllElements();
+            ChromeDriver driver = new ChromeDriver(options);
+            driver.get("https://search.naver.com/search.naver?query=" + bookTitleBuilder.toString());
 
-                for (Element e : elements) {
-                    bodys.add(e.text());
-                }
+            WebElement webBody = driver.findElement(By.tagName("body"));
 
-            }
+            // 예시: 지식백과 내용이 들어 있는 div 찾기 (클래스 이름은 상황에 따라 달라질 수 있음)
+            List<WebElement> descs = webBody.findElements(By.className("detail_box"));
 
-            Map<String, Double> similarityMap = new LinkedHashMap<>();
+            Map<String, Double> map = new HashMap<>();
 
-            for (String word : findWord) {
-                for (Character fw : word.toCharArray()) {
-                    for (String webBody : bodys) {
-                        double similarity = computeCosineSimilarity(word, webBody);
-                        for (Character bw : webBody.toCharArray()) {
-                            if (fw.equals(bw)) {
-                                similarity += 0.1;
-                            }
-                        }
-                        similarityMap.put(webBody, similarity);
+            for (String query:querys){
+                for (WebElement el : descs) {
+                    double similarity = calculateJaccardSimilarity(query, el.getText());
+                    similarity += computeCosineSimilarity(query, el.getText());
+
+                    Document doc = Jsoup.parse(el.getAttribute("innerHTML"));
+                    Element parsed = doc.body();
+                    if(parsed!=null) {
+                        map.put(parsed.text(), similarity);
                     }
                 }
             }
 
-            List<Map.Entry<String, Double>> list = new LinkedList<>(similarityMap.entrySet());
-            // 2. Value 기준으로 정렬 (오름차순)
-            Collections.sort(list, (o1, o2) -> o2.getValue().compareTo(o1.getValue()));
-            //System.out.println("list = " + list);
+            List<Map.Entry<String, Double>> list = new LinkedList<>(map.entrySet());
+            list.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+            driver.quit();
 
-            final int MAX = 5;
-            int count = 0;
+            List<String> result = new ArrayList<>();
 
-            StringBuffer sb = new StringBuffer();
+            if(!list.isEmpty()) {
 
-            for (Map.Entry<String, Double> entry : list) {
-
-                if (count <= MAX) {
-                    sb.append(entry.getKey());
+                for (String query:querys) {
+                    for (Map.Entry<String, Double> entry : list) {
+                        if (split(entry.getKey()).contains(split(title)) || split(entry.getKey()).contains(split(query))) {
+                            System.out.println("entry = " + entry.getKey());
+                            result.add(entry.getKey());
+                        }
+                    }
                 }
-                count++;
-
             }
-            List<String> result = getKeyword(sb.toString());
 
             return result;
+
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
-
-        return null;
     }
 
     private String split(String query) {
@@ -137,6 +133,7 @@ public class TagController {
                 .distinct()  // 중복 제거
                 .collect(Collectors.toList());
 
+        System.out.println("핵심 단어: " + keywords);
         return keywords;
     }
 
@@ -168,4 +165,26 @@ public class TagController {
         return dot / (Math.sqrt(normA) * Math.sqrt(normB) + 1e-10);
     }
 
+
+    // 문자열을 단어 집합으로 분리 (공백 기준)
+    private  Set<String> tokenize(String text) {
+        text = text.toLowerCase().replaceAll("[^a-zA-Z가-힣0-9\\s]", "");
+        return new HashSet<>(Arrays.asList(text.split("\\s+")));
+    }
+
+    // Jaccard 유사도 계산
+    private  double calculateJaccardSimilarity(String word, String sentence) {
+        Set<String> set1 = tokenize(word);
+        Set<String> set2 = tokenize(sentence);
+
+        Set<String> intersection = new HashSet<>(set1);
+        intersection.retainAll(set2);
+
+        Set<String> union = new HashSet<>(set1);
+        union.addAll(set2);
+
+        if (union.isEmpty()) return 0.0;
+
+        return (double) intersection.size() / union.size();
+    }
 }
