@@ -2,6 +2,8 @@
 
 접근제어자와 상속구조로 SERVICE DATA DRIVEN DEVELOPMENT 완료 
 
+QNA / TAG 컨트롤러 (서비스) 만듬 형태소 분절-> 명사 추출 -> 크롤링 -> 유사도 측정-> 결과값 리턴 
+
 1. 아키텍처
 pagkage 
   - service  (defualt)
