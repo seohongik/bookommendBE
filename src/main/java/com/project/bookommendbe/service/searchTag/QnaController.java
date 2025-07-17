@@ -94,8 +94,6 @@ public class QnaController {
                 }
             }
 
-            System.out.println("resultMap = " + resultMap);
-
         } catch (Exception e) {
             e.printStackTrace();
             // 커스텀 에러 만들어서 리턴
