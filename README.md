@@ -9,9 +9,9 @@ QNA / TAG 컨트롤러 (서비스) 만듬 형태소 분절-> 명사 추출 -> �
 
 1-> 그래서 링크를 첨부했다 
 
-![검색결과](/Users/seohong-ig/Desktop/Simulator Screenshot - iPhone 16 Pro - 2025-07-18 at 00.35.10.png)
+![검색결과](images/Simulator Screenshot - iPhone 16 Pro - 2025-07-18 at 00.35.10.png)
 
-![검색결과2](/Users/seohong-ig/Desktop/Simulator Screenshot - iPhone 16 Pro - 2025-07-18 at 00.35.10.png)
+![검색결과2](images/Simulator Screenshot - iPhone 16 Pro - 2025-07-18 at 00.35.10.png)
 
 
 
