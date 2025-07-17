@@ -7,6 +7,7 @@ import kr.co.shineware.nlp.komoran.model.Token;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -22,15 +23,13 @@ import java.util.stream.Collectors;
 public class QnaController {
 
     @GetMapping("/r1/qna")
+    public Map<String,String> qna(@RequestParam  String title, @RequestParam  String body ) {
+        //String title = "뉴욕3부작";
+        //String body = "내용이 뭐지?";
+        //String title = "슈퍼맨";
+        //String body = "내용이 뭐지?";
 
-    public List<String> qna(@RequestParam  String title, @RequestParam  String body ) {
-        //String bookTitleQuery = "뉴욕3부작";
-        //String queryBody = "내용이 뭐지?";
-
-        //String bookTitleQuery = "슈퍼맨";
-        //String queryBody = "내용이 뭐지?";
-
-
+        Map<String, String> resultMap = new LinkedHashMap<>();
         List<String> querys = getKeyword(body);
 
         // 1. bookTitleQuery 단어 분리
@@ -49,59 +48,62 @@ public class QnaController {
                 bookTitleBuilder.append("+");
             }
         }
+
+        ChromeOptions options = new ChromeOptions();
+
+        ChromeDriver driver = new ChromeDriver(options);
         try {
-
             WebDriverManager.chromedriver().setup();
-
-            ChromeOptions options = new ChromeOptions();
-
-            ChromeDriver driver = new ChromeDriver(options);
             driver.get("https://search.naver.com/search.naver?query=" + bookTitleBuilder.toString());
 
             WebElement webBody = driver.findElement(By.tagName("body"));
-
             // 예시: 지식백과 내용이 들어 있는 div 찾기 (클래스 이름은 상황에 따라 달라질 수 있음)
             List<WebElement> descs = webBody.findElements(By.className("detail_box"));
 
-            Map<String, Double> map = new HashMap<>();
+            Map<String, Double> bodyMap = new HashMap<>();
+            Map<String, String>  linkMap= new HashMap<>();
 
             for (String query:querys){
                 for (WebElement el : descs) {
                     double similarity = calculateJaccardSimilarity(query, el.getText());
                     similarity += computeCosineSimilarity(query, el.getText());
-
                     Document doc = Jsoup.parse(el.getAttribute("innerHTML"));
                     Element parsed = doc.body();
-                    if(parsed!=null) {
-                        map.put(parsed.text(), similarity);
+
+                    Document parsedDoc = Jsoup.parse(parsed.toString());
+                    Elements texts = parsedDoc.select("a[href]");
+
+                    for (Element text : texts) {
+                        bodyMap.put(text.text(), similarity);
+                        linkMap.put(text.text(), text.attr("href"));
                     }
                 }
             }
 
-            List<Map.Entry<String, Double>> list = new LinkedList<>(map.entrySet());
+            List<Map.Entry<String, Double>> list = new LinkedList<>(bodyMap.entrySet());
             list.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
-            driver.quit();
-
-            List<String> result = new ArrayList<>();
 
             if(!list.isEmpty()) {
 
                 for (String query:querys) {
                     for (Map.Entry<String, Double> entry : list) {
-                        if (split(entry.getKey()).contains(split(title)) || split(entry.getKey()).contains(split(query))) {
-                            System.out.println("entry = " + entry.getKey());
-                            result.add(entry.getKey());
+                        if (split(entry.getKey()).contains(split(title)) || split(entry.getKey()).contains(split(query)) && "".equals(entry.getKey())) {
+                            resultMap.put(linkMap.get(entry.getKey()), entry.getKey());
                         }
                     }
                 }
             }
 
-            return result;
+            System.out.println("resultMap = " + resultMap);
 
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            // 커스텀 에러 만들어서 리턴
+        }finally {
+            driver.quit();
         }
+
+        return resultMap;
     }
 
     private String split(String query) {
@@ -187,4 +189,5 @@ public class QnaController {
 
         return (double) intersection.size() / union.size();
     }
+
 }
