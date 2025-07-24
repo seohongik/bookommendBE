@@ -1,5 +1,7 @@
 package com.project.bookommendbe.service.searchTag;
 
+import org.springframework.stereotype.Service;
+
 import java.util.Map;
 
 public interface QnaService {

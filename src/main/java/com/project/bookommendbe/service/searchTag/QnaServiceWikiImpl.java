@@ -30,9 +30,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 // 이것만 합법임
-@Service("QnaServiceWikiImpl")
+@Service
 public class QnaServiceWikiImpl implements QnaService {
 
+
+    @Override
     public Map<String, String> getQna(String title, String body) {
 
         //String title = "뉴욕3부작";
@@ -65,7 +67,6 @@ public class QnaServiceWikiImpl implements QnaService {
         Map<String, String> result = new HashMap<>();
         try {
 
-            //WebDriverManager.chromedriver().setup();
 
             try {
                 Document document = Jsoup.connect("https://ko.wikipedia.org/wiki/" + title).get();

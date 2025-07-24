@@ -18,14 +18,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-@Service("QnaServiceNaverImpl")
+@Service
 public class QnaServiceNaverImpl implements QnaService {
-    @Override
-    public Map<String, String> getQna(String title, String body) {
-        return Map.of();
-    }
 
-    /*
+    /*public Map<String, String> getQna(String title, String body) {
+        return Map.of();
+    }*/
+
+    @Override
     public Map<String, String> getQna(String title, String body) {
 
         //String title = "뉴욕3부작";
@@ -191,5 +191,5 @@ public class QnaServiceNaverImpl implements QnaService {
         if (union.isEmpty()) return 0.0;
 
         return (double) intersection.size() / union.size();
-    }*/
+    }
 }

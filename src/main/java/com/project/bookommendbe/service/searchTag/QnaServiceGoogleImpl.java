@@ -17,14 +17,14 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Service("QnaServiceGoogleImpl")
+@Service
 public class QnaServiceGoogleImpl implements QnaService {
-    @Override
+   /* @Override
     public Map<String, String> getQna(String title, String body) {
         return Map.of();
-    }
+    }*/
 
-    /*
+    @Override
     public Map<String, String> getQna(String title, String body) {
 
         Map<String, String> resultMap = new LinkedHashMap<>();
@@ -186,5 +186,5 @@ public class QnaServiceGoogleImpl implements QnaService {
         if (union.isEmpty()) return 0.0;
 
         return (double) intersection.size() / union.size();
-    }*/
+    }
 }
