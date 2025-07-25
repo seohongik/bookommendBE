@@ -29,8 +29,7 @@ public class QnaController {
         if(false){ // 조건문 로직 짜야함 구글 네이버는 불법이기에 일단 false
             ans.put("goggle",getAnswer(title,body, "goggle"));
         }
-
-        if(true){
+        if(false){
             ans.put("naver",getAnswer(title,body, "naver"));
         }
         if(true){
@@ -41,8 +40,8 @@ public class QnaController {
 
     }
 
-    public  Map<String, String> getAnswer(String title, String body,String mapKey){
-        QnaService qnaService=qnaServiceMap.get(mapKey);
+    public  Map<String, String> getAnswer(String title, String body,String beanNameAndKey){
+        QnaService qnaService=qnaServiceMap.get(beanNameAndKey);
         return qnaService.getQna(title,body);
 
     }
