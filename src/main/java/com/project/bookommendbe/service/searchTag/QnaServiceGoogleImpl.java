@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Service
+@Service("google")
 public class QnaServiceGoogleImpl implements QnaService {
    /* @Override
     public Map<String, String> getQna(String title, String body) {
@@ -54,7 +54,7 @@ public class QnaServiceGoogleImpl implements QnaService {
             WebDriverManager.chromedriver().setup();
 
             // 불법이라 해서 안씀
-            //driver.get("https://www.google.com/search?q=" + bookTitleBuilder.toString());
+            driver.get("https://www.google.com/search?q=" + bookTitleBuilder.toString());
 
             WebElement webBody = driver.findElement(By.tagName("body"));
             // 예시: 지식백과 내용이 들어 있는 div 찾기 (클래스 이름은 상황에 따라 달라질 수 있음)

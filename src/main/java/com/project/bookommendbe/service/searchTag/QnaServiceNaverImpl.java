@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-@Service
+@Service("naver")
 public class QnaServiceNaverImpl implements QnaService {
 
     /*public Map<String, String> getQna(String title, String body) {
@@ -59,7 +59,7 @@ public class QnaServiceNaverImpl implements QnaService {
         try {
             WebDriverManager.chromedriver().setup();
             // 불법이라 쫄려서 안씀
-            //driver.get("https://search.naver.com/search.naver?query=" + bookTitleBuilder.toString());
+            driver.get("https://search.naver.com/search.naver?query=" + bookTitleBuilder.toString());
 
             WebElement webBody = driver.findElement(By.tagName("body"));
             // 예시: 지식백과 내용이 들어 있는 div 찾기 (클래스 이름은 상황에 따라 달라질 수 있음)

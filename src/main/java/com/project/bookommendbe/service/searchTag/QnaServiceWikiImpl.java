@@ -30,7 +30,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 // 이것만 합법임
-@Service
+@Service("wiki")
 public class QnaServiceWikiImpl implements QnaService {
 
 

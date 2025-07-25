@@ -1,5 +1,6 @@
 package com.project.bookommendbe.service.searchTag;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -13,13 +14,11 @@ import java.util.stream.Collectors;
 @RestController
 public class QnaController {
 
-    //private final Map<String,QnaService> qnaServiceMap;
-    private final ApplicationContext acc;
+    private final Map<String,QnaService> qnaServiceMap;
 
     @Autowired
-    public QnaController( ApplicationContext acc) {
-       // this.qnaServiceMap = qnaServiceMap;
-        this.acc = acc;
+    public QnaController(Map<String,QnaService> qnaServiceMap) {
+        this.qnaServiceMap = qnaServiceMap;
     }
 
 
@@ -28,21 +27,24 @@ public class QnaController {
 
         Map<String,Map<String,String>> ans = new HashMap<>();
         if(false){ // 조건문 로직 짜야함 구글 네이버는 불법이기에 일단 false
-            ans.put("goggle",getAnswer(title,body,"qnaServiceGoogleImpl"));
-        }else if(false){
-            ans.put("naver",getAnswer(title,body,"qnaServiceNaverImpl"));
-        }else {
-            ans.put("wiki",getAnswer(title,body,"qnaServiceWikiImpl"));
+            ans.put("goggle",getAnswer(title,body, "goggle"));
         }
 
-        System.out.println("ans = " + ans);
+        if(true){
+            ans.put("naver",getAnswer(title,body, "naver"));
+        }
+        if(true){
+            ans.put("wiki",getAnswer(title,body,"wiki"));
+        }
+
         return ans;
 
     }
 
-    public  Map<String, String> getAnswer(String title, String body,String beanName){
-        QnaService qnaService=acc.getBean(beanName,QnaService.class);
+    public  Map<String, String> getAnswer(String title, String body,String mapKey){
+        QnaService qnaService=qnaServiceMap.get(mapKey);
         return qnaService.getQna(title,body);
+
     }
 
 }
