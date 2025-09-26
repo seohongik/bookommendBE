@@ -13,15 +13,12 @@ import java.util.Set;
 public class RecommendController {
 
     private RecommendService recommendService;
-
     @Autowired
     public RecommendController(RecommendService recommendService) {
         this.recommendService = recommendService;
     }
-
     @GetMapping("recommend/r1/genre-based-recommend/{userId}")
     public Set<RecommendBookVO> genreBasedRecommend(@PathVariable String  userId) {
-
         log.info("recommend genre based recommend ::{}",recommendService.genreBasedRecommend(Long.valueOf(userId)));
         return recommendService.genreBasedRecommend(Long.valueOf(userId));
     }
