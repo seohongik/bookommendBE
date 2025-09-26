@@ -21,11 +21,9 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserController {
 
-
     private final TimeLineService timeLineService;
     private final UserService userService;
     private final EmailConfig emailConfig;
-
 
     @GetMapping("/r1/timeline")
     public List<TimelineVO> timeline(@RequestParam Map<String, String> pramMap) {
@@ -33,25 +31,19 @@ public class UserController {
     }
 
     @PostMapping("/c1/user")
-    public ResponseEntity userCreate( @Valid @RequestBody UserVO userVO, BindingResult bindingResult) throws NoSuchAlgorithmException, UserException {
-        
+    public ResponseEntity userCreate( @Valid @RequestBody UserVO userVO, BindingResult bindingResult) throws NoSuchAlgorithmException, UserException {        
         if(!bindingResult.hasErrors()) {
+            UserException userCreate = userService.create(userVO);
             StringBuilder sb = new StringBuilder();
             if(userCreate==null) {
                 Map<String, String> map = new HashMap<>();
                 map.put("msg", "회원가입 완료");
                 return makeResponse(sb, map);
-            }else {
-                try {
-                    UserException userCreate = userService.create(userVO);
-                }catch (UserException e) {
-                    return isError(bindingResult, new StringBuilder(e.getMessage()));
-                }
-            }
+            }else{
+                return isError(bindingResult, new StringBuilder("회원가입 실패"));            }
         }else {
             return isError(bindingResult, new StringBuilder("회원가입 실패"));
         }
-
     }
 
 
@@ -59,22 +51,18 @@ public class UserController {
     public ResponseEntity login(@Valid @ModelAttribute LoginVO loginVO, BindingResult bindingResult) throws NoSuchAlgorithmException {
 
         StringBuilder sb = new StringBuilder();
-
         if(bindingResult.hasErrors()) {
             return isError(bindingResult, sb);
         }
-
         UserVO userVO = new UserVO();
         userVO.setEmail(loginVO.getEmail());
         userVO.setPassword(loginVO.getPassword());
         Optional<User> user=userService.findUserByEmailAndPassword(userVO);
-
         Map<String,String> map=new HashMap<>();
         if(user.isPresent()) {
             map.put("id", String.valueOf(user.get().getId()));
             return makeResponse(sb,map);
         }
-
         return makeResponse(new StringBuilder("정보가 없습니다."), new HashMap<>());
 
     }
@@ -83,15 +71,12 @@ public class UserController {
     public ResponseEntity isUserId(@Valid @ModelAttribute UserFindIdVO userFindVO, BindingResult bindingResult) throws NoSuchAlgorithmException, jakarta.mail.MessagingException {
 
         StringBuilder sb = new StringBuilder();
-
         if(bindingResult.hasErrors()) {
             return isError(bindingResult, sb);
         }
-
         UserVO userVO = new UserVO();
         userVO.setSignUpId(userFindVO.getSignUpId());
         userVO.setPhoneNumber(String.valueOf(userFindVO.getPhoneNumber()));
-
         Optional<User> user=userService.findUserBySignUpIdAndPhoneNumber(userVO);
         if(user.isPresent()) {
             Map<String, String> map=new HashMap<>();
@@ -100,24 +85,20 @@ public class UserController {
         }else {
             return makeResponse(new StringBuilder("정보가 없습니다."), new HashMap<>());
         }
-
     }
 
     @GetMapping("/r1/isUserPw")
     public ResponseEntity isUserPw(@Valid @ModelAttribute UserFindPwVO userFindVO, BindingResult bindingResult) throws NoSuchAlgorithmException, jakarta.mail.MessagingException {
 
         StringBuilder sb = new StringBuilder();
-
         if(bindingResult.hasErrors()) {
             return isError(bindingResult, sb);
         }
-
         UserVO userVO = new UserVO();
         userVO.setEmail(userFindVO.getEmail());
         userVO.setPhoneNumber(String.valueOf(userFindVO.getPhoneNumber()));
         Optional<User> user=userService.findUserByEmailAndPhoneNumber(userVO);
-
-
+        
         if(user.isPresent()) {
             //StringBuilder stringBuilder = new StringBuilder();
             int authNumber = new AuthNumber().getNumber();
@@ -130,7 +111,6 @@ public class UserController {
         }else {
             return makeResponse(new StringBuilder("정보가 없습니다"), new HashMap<>());
         }
-
     }
 
     @GetMapping("/r1/verify")
@@ -154,13 +134,10 @@ public class UserController {
 
     @PutMapping("/u1/password/verified")
     public void updatePasswordUser(@RequestBody UserVO userVO) throws NoSuchAlgorithmException {
-        log.error(userVO.toString());
         userService.updatePassword(userVO);
     }
 
     private ResponseEntity makeResponse( StringBuilder message, Map<String,String> value) {
-
-
         if(!value.isEmpty()){
             return ResponseEntity.status(HttpStatus.OK).body(value);
         }else {
@@ -174,9 +151,6 @@ public class UserController {
             String msg = objectError.getDefaultMessage();
             sb.append(msg).append("\n").append("\n");
         });
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(sb.toString());
-
     }
-
 }
