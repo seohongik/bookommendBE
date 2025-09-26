@@ -7,13 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 public abstract class RecordServiceSuper {
-
-
     protected final RecordRepository recordRepository;
-
     public RecordServiceSuper(RecordRepository recordRepository) {
         this.recordRepository = recordRepository;
     }
-
     public abstract List<ReadingRecord> findRecordByUserAndDateOpen(User user, String date);
 }
