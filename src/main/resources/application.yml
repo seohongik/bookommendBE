@@ -3,8 +3,8 @@ spring:
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://localhost:3306/Account?characterEncoding=UTF-8&serverTimezone=UTC
-    username: bgBird8901
-    password: bgWings@8901
+    username: test
+    password: test
 
   jpa:
     database-platform: org.hibernate.dialect.MariaDBDialect
@@ -21,8 +21,8 @@ spring:
   mail:
     host: smtp.naver.com
     port: 465 # 또는 587
-    username: hongcha11@naver.com # 네이버 이메일 주소
-    password: bgWings@8901 # 네이버 앱 비밀번호 또는 메일 비밀번호
+    username: test
+    password: test
     properties:
       mail:
         smtp:
@@ -39,12 +39,12 @@ logging:
 
 naver:
   clientId:
-    IaJS80_1NYqHLW7YxLuE
+    test
   secretId:
-    lEpRztqF_K
+    test
   url: https://openapi.naver.com
   path: /v1/search/book.json
 
 library:
   key:
-    c3de52dc43918e531508d66204c0454a2013f80edb086bac11ed2200b1cf1a46
+    test
