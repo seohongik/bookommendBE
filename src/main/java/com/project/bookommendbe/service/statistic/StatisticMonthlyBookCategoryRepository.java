@@ -12,7 +12,6 @@ import java.util.List;
 @Repository
 public interface StatisticMonthlyBookCategoryRepository extends JpaRepository<ReadingRecord, Long> {
     @Query(value = """
-
             SELECT  COUNT(b.book_category) AS categoryCount,
                       b.book_category AS category
                 FROM (
