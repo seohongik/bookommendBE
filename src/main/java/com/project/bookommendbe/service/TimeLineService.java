@@ -37,12 +37,9 @@ public class TimeLineService {
         for (ReadingRecord readingRecord : readingRecords) {
 
             Optional<UserBook> userBookOptional = userBookService.getUserBookListTimeLineOpen(user.get(), readingRecord.getBookIsbn());
-
             UserBook userBook = userBookOptional.get();
             if(userBook.getBook().getBookIsbn().equals(readingRecord.getBookIsbn())) {
-
                 TimelineVO timelineVO = new TimelineVO();
-
                 timelineVO.setTitle(userBook.getBook().getTitle());
                 timelineVO.setAuthor(userBook.getBook().getAuthor());
                 timelineVO.setDate(readingRecord.getDate());
@@ -60,11 +57,8 @@ public class TimeLineService {
             }
         }
         for (TimelineVO timelineVO : timelines) {
-
             for (Review review : reviews) {
-
                 if (review.getBook().getBookIsbn().equals(timelineVO.getBookIsbn())) {
-
                     timelineVO.setCreatedAt(review.getCreatedAt());
                     if (review.getRating().equals(RatingEnum.ONE)) {
                         timelineVO.setRating("나의 별 " + "\u2B50");
@@ -77,7 +71,6 @@ public class TimeLineService {
                     } else if (review.getRating().equals(RatingEnum.FIVE)) {
                         timelineVO.setRating("나의 별 " + "\u2B50" + "\u2B50" + "\u2B50" + "\u2B50" + "\u2B50");
                     }
-
                 }
             }
         }
