@@ -40,8 +40,7 @@ public class RestTempService{
        // }
         return uriString;
     }
-
-
+    
     HttpHeaders makeHeader(Map<String,String> headerItem) throws MalformedURLException {
         HttpHeaders headers = new HttpHeaders();
         for (String key : headerItem.keySet()) {
