@@ -18,17 +18,12 @@ public class EmailConfig {
 
     @Value("${spring.mail.host}")
     private String host;
-
     @Value("${spring.mail.port}")
     private int port;
-
     @Value("${spring.mail.username}")
     private String username;
-
     @Value("${spring.mail.password}")
     private String password;
-
-
     public void javaMailSender(String to, String subject, String text) throws MessagingException {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost(host);
@@ -55,7 +50,6 @@ public class EmailConfig {
         Transport.send(message);
         System.out.println("메일 전송 성공!");
     }
-
     @Bean
     public Properties getMailProperties() {
         Properties props = new Properties();
@@ -65,12 +59,10 @@ public class EmailConfig {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.port", port);
         props.put("mail.smtp.socketFactory.fallback", "false"); // SSL 실패 시 일반 소켓 사용 안 함
-
         return props;
     }
-
+    
     public void sendEmail(User user, int authNumber) throws jakarta.mail.MessagingException, NoSuchAlgorithmException {
-
         String text = "<html>" +
                 "<body>" +
                 "<h3>이메일 인증을 위해 아래 링크를 클릭해주세요.</h3>" +
