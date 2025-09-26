@@ -21,10 +21,8 @@ public class QnaController {
         this.qnaServiceMap = qnaServiceMap;
     }
 
-
     @GetMapping("/r1/qna")
     public Map<String,Map<String,String>> qna(@RequestParam  String title, @RequestParam  String body ) {
-
         Map<String,Map<String,String>> ans = new HashMap<>();
         if(false){ // 조건문 로직 짜야함 구글 네이버는 불법이기에 일단 false
             ans.put("goggle",getAnswer(title,body, "goggle"));
@@ -35,7 +33,6 @@ public class QnaController {
         if(true){
             ans.put("wiki",getAnswer(title,body,"wiki"));
         }
-
         return ans;
 
     }
@@ -43,7 +40,5 @@ public class QnaController {
     public  Map<String, String> getAnswer(String title, String body,String beanNameAndKey){
         QnaService qnaService=qnaServiceMap.get(beanNameAndKey);
         return qnaService.getQna(title,body);
-
     }
-
 }
