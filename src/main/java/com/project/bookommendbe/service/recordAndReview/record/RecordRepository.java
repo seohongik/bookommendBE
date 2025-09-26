@@ -10,6 +10,5 @@ import java.util.List;
 
 @Repository
 interface RecordRepository extends JpaRepository<ReadingRecord, Long> {
-
     List<ReadingRecord> findReadingRecordsByUserAndDate(User user, String date);
 }
