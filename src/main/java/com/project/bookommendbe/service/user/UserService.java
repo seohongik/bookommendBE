@@ -17,18 +17,15 @@ import java.util.Optional;
 public class UserService extends UserServiceSuper{
 
     protected final UserRepository userRepository;
-
     @Autowired
     UserService(UserRepository userRepository) {
         super(userRepository);
         this.userRepository = userRepository;
     }
-
     @Override
     public Optional<User> getUserByIdOpen(Long id) {
         return userRepository.findById(id);
     }
-
 
     UserException create(UserVO userVO) throws NoSuchAlgorithmException {
         User user = new User();
@@ -41,7 +38,6 @@ public class UserService extends UserServiceSuper{
         user.setPhoneNumber(encodingInformation(String.valueOf(userVO.getPhoneNumber())));
         user.setSignUpId(userVO.getSignUpId());
         user.setPhoneNumberTypical(userVO.getPhoneNumber());
-
         try {
             Optional<User> check=userRepository.findUserByEmailOrPhoneNumber(userVO.getEmail(), encodingInformation(userVO.getPhoneNumber()));
             if(check.isEmpty()) {
@@ -52,10 +48,8 @@ public class UserService extends UserServiceSuper{
         }catch (Exception e){
             e.printStackTrace();
         }
-
         return null;
     }
-
 
      Optional<User> findUserByEmailAndPhoneNumber(UserVO userVO) throws NoSuchAlgorithmException {
         String[] param = {userVO.getEmail(), encodingInformation(userVO.getPhoneNumber())};
