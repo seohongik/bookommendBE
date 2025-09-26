@@ -23,9 +23,7 @@ public class TimeLineService {
     private final ReviewService reviewService;
     private final RecordService recordService;
 
-
     public List<TimelineVO>  makeTimeLine(Map<String, String > pramMap) {
-
         List<TimelineVO> timelines = new ArrayList<>();
         long userId = Long.parseLong(pramMap.get("userId"));
         String date = pramMap.get("date");
@@ -33,7 +31,6 @@ public class TimeLineService {
         Optional<User> user = userService.getUserByIdOpen(userId);
         List<ReadingRecord> readingRecords =recordService.findRecordByUserAndDateOpen(user.get(),date);
         List<Review> reviews =reviewService.findReviewsByUserAndReviewDateOpen(user, date);
-
         for (ReadingRecord readingRecord : readingRecords) {
 
             Optional<UserBook> userBookOptional = userBookService.getUserBookListTimeLineOpen(user.get(), readingRecord.getBookIsbn());
