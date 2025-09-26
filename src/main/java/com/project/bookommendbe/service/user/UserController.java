@@ -34,9 +34,7 @@ public class UserController {
 
     @PostMapping("/c1/user")
     public ResponseEntity userCreate( @Valid @RequestBody UserVO userVO, BindingResult bindingResult) throws NoSuchAlgorithmException, UserException {
-
-
-        UserException userCreate = userService.create(userVO);
+        
         if(!bindingResult.hasErrors()) {
             StringBuilder sb = new StringBuilder();
             if(userCreate==null) {
@@ -45,7 +43,7 @@ public class UserController {
                 return makeResponse(sb, map);
             }else {
                 try {
-                    throw userCreate;
+                    UserException userCreate = userService.create(userVO);
                 }catch (UserException e) {
                     return isError(bindingResult, new StringBuilder(e.getMessage()));
                 }
