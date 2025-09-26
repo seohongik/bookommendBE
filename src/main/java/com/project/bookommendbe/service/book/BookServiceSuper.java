@@ -9,14 +9,9 @@ import java.util.Optional;
 
 @Service
 public abstract class BookServiceSuper {
-
     protected final BookRepository bookRepository;
-
     public BookServiceSuper(BookRepository bookRepository) {
         this.bookRepository = bookRepository;
     }
-
     public abstract Optional<Book> findBookByBookIsbnOpen(String isbn);
-
-
 }
