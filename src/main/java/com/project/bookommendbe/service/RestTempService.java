@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 public class RestTempService{
 
     public  <T>ResponseEntity<T> response(String url,  String path ,  MultiValueMap<String, String> paramMap, Map<String,String> headerItem, HttpMethod httpMethod , Class<?> tClass) throws MalformedURLException {
-
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers=null;
         if(headerItem!=null) {
@@ -31,7 +30,6 @@ public class RestTempService{
 
     String makeUri(String url,String path, MultiValueMap<String, String> params ) throws MalformedURLException {
         URL newUri = new URL(url);
-
         //for (String key : paramMap.keySet()) {
         String uriString =UriComponentsBuilder.newInstance()
                     .scheme(newUri.getProtocol())
@@ -39,15 +37,12 @@ public class RestTempService{
                     .path(path)
                     .queryParams(params)
                     .build().toString();
-
        // }
         return uriString;
-
     }
 
 
     HttpHeaders makeHeader(Map<String,String> headerItem) throws MalformedURLException {
-
         HttpHeaders headers = new HttpHeaders();
         for (String key : headerItem.keySet()) {
             headers.add(key, headerItem.get(key));
