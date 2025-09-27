@@ -40,7 +40,13 @@ public class UserController {
                 map.put("msg", "회원가입 완료");
                 return makeResponse(sb, map);
             }else{
-                return isError(bindingResult, new StringBuilder("회원가입 실패"));            }
+                try {
+                    throw userCreate;
+                }catch (UserException e) {
+                    e.printStackTrace();
+                    return isError(bindingResult, new StringBuilder("회원가입 실패"));
+                }
+            }
         }else {
             return isError(bindingResult, new StringBuilder("회원가입 실패"));
         }
