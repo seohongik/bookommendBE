@@ -19,7 +19,6 @@ import java.util.Optional;
 @RestController
 public class ReportController {
 
-
     private final ReportService reportService;
 
     @Autowired
@@ -31,6 +30,10 @@ public class ReportController {
     public void saveUserReportBy(@RequestBody ReportVO saveRequest) {
 
         //TODO 컨트롤러 만들기
+
+        Report report=reportService.saveUserReportBy(saveRequest);
+
+
 
     }
 }

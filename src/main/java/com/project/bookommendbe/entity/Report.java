@@ -17,8 +17,6 @@ public class Report {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String bookIsbn;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(referencedColumnName="id")
     private User user;
@@ -33,10 +31,15 @@ public class Report {
 
     private  List<String> sympathyLines;
 
-    private  LocalDateTime reportDateTime;
+    private  LocalDate reportDate;
+
+    private String year;
+
+    private String month;
 
     private LocalDateTime createdAt;
 
     private String createdBy;
+
 
 }

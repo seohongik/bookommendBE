@@ -17,6 +17,10 @@ public class ReportVO {
 
     private Long userId;
 
+    private String year;
+
+    private String month;
+
     private Long userBookId;
 
     private String reportTitle;
