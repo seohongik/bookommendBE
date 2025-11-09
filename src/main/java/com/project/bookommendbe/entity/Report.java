@@ -29,7 +29,7 @@ public class Report {
 
     private  String reportContent;
 
-    private  List<String> sympathyLines;
+    private  String sympathyLines;
 
     private  LocalDate reportDate;
 

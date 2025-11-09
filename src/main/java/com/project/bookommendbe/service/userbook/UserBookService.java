@@ -5,6 +5,7 @@ import com.project.bookommendbe.dto.UserBookVO;
 import com.project.bookommendbe.entity.Book;
 import com.project.bookommendbe.entity.User;
 import com.project.bookommendbe.entity.UserBook;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class UserBookService extends UserBookServiceSuper{
 
@@ -28,7 +30,7 @@ public class UserBookService extends UserBookServiceSuper{
 
     @Override
     public List<UserBook> getUserBooksByUserOpen(Optional<User> user) {
-        return userBookRepository.findUserBooksByUser(user.get());
+        return userBookRepository.findUserBooksByUserId(user.get().getId());
     }
 
     @Override
@@ -98,7 +100,6 @@ public class UserBookService extends UserBookServiceSuper{
 
         List<UserBookVO> userBookReadings= new ArrayList<>();
         for (UserBook userBook : userBooks) {
-
             Book book = userBook.getBook();
 
             UserBookVO userBookReadVO = new UserBookVO();
@@ -117,6 +118,8 @@ public class UserBookService extends UserBookServiceSuper{
             userBookReadings.add(userBookReadVO);
 
         }
+
+        log.debug("userBookReadings: {}", userBookReadings);
         return userBookReadings;
     }
 

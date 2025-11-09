@@ -42,10 +42,12 @@ public class UserBookController {
 
 
     @GetMapping("/r1/userBooks/{userId}")
-    public List<UserBookVO> getUserBookById(@PathVariable long userId) throws JsonProcessingException, MalformedURLException {
-        Optional<User> user =  userService.getUserByIdOpen(userId);
-        List<UserBook> userBooks   = userBookService.findUserBooksByUser(user.get());
-        return userBookService.getReadingUserBookList(userBooks);
+    public List<UserBookVO> getUserBookById(@PathVariable String userId) {
+        log.info("getUserBookById:::::::::::{}", userId);
+        Optional<User> user =  userService.getUserByIdOpen(Long.valueOf(userId));
+
+        log.info("user::::{}", user.get());
+        return userBookService.getReadingUserBookList(user.get().getUserBook());
     }
 
     @GetMapping("/p1/saveUserBook")

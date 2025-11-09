@@ -9,6 +9,7 @@ import com.project.bookommendbe.service.recordAndReview.record.RecordService;
 import com.project.bookommendbe.service.recordAndReview.review.ReviewService;
 import com.project.bookommendbe.service.user.UserService;
 import com.project.bookommendbe.service.userbook.UserBookService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
+@Slf4j
 @RestController
 public class ReportController {
 
@@ -28,12 +30,8 @@ public class ReportController {
 
     @PostMapping("/c1/userReport")
     public void saveUserReportBy(@RequestBody ReportVO saveRequest) {
-
+        log.info("saveUserReportBy :::::::{}", saveRequest);
         //TODO 컨트롤러 만들기
-
-        Report report=reportService.saveUserReportBy(saveRequest);
-
-
-
+        reportService.saveUserReportBy(saveRequest);
     }
 }

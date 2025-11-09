@@ -4,6 +4,11 @@ import com.project.bookommendbe.dto.ReportVO;
 import com.project.bookommendbe.dto.UserVO;
 import com.project.bookommendbe.entity.Report;
 import com.project.bookommendbe.entity.User;
+import com.project.bookommendbe.entity.UserBook;
+import com.project.bookommendbe.service.user.UserService;
+import com.project.bookommendbe.service.user.UserServiceSuper;
+import com.project.bookommendbe.service.userbook.UserBookService;
+import com.project.bookommendbe.service.userbook.UserBookServiceSuper;
 import jakarta.xml.bind.DatatypeConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -17,39 +22,46 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
 public class ReportService extends ReportServiceSuper {
 
     protected final ReportRepository reportRepository;
-
+    protected final UserService userService;
+    protected final UserBookService userBookService;
     @Autowired
-    ReportService(ReportRepository reportRepository) {
+    ReportService(ReportRepository reportRepository, UserService userService, UserBookService userBookService) {
         super(reportRepository);
         this.reportRepository = reportRepository;
+        this.userService = userService;
+        this.userBookService = userBookService;
+
     }
 
     public Report saveUserReportBy(ReportVO saveRequest) {
         //TODO 로직 작성
-
+        Optional<User> user=userService.getUserByIdOpen(saveRequest.getUserId());
+        UserBook userBook=userBookService.getUserBooksByIdAndUserIdOpen(saveRequest.getUserBookId(),saveRequest.getUserId());
         Report report = new Report();
-        report.getUser().setId(saveRequest.getUserId());
-        report.getUserBook().setId(saveRequest.getUserBookId());
+        report.setUser(user.get());
+        report.setUserBook(userBook);
         report.setReportContent(saveRequest.getReportContent());
         report.setReportTitle(saveRequest.getReportTitle());
-        report.setSympathyLines(saveRequest.getSympathyLines());
+        saveRequest.setImageUrl(userBook.getBook().getCoverImageUrl());
+        saveRequest.setDescription(userBook.getBook().getDescription());
+
         report.setYear(saveRequest.getYear());
         report.setMonth(saveRequest.getMonth());
         report.setCreatedAt(LocalDateTime.now());
-        report.setReportDate(LocalDate.of(Integer.parseInt(saveRequest.getYear()),Integer.parseInt(saveRequest.getMonth()),LocalDateTime.now().getDayOfMonth()));
+        report.setReportDate(LocalDate.now());
         reportRepository.save(report);
 
         try {
             String userName = "seohong-ig";
-            getHtmlContentIndex(userName);
-            getHtmlDetail(report, userName);
+            getHtmlContentIndex(userName,user, saveRequest);
+            getHtmlDetail(saveRequest, userName, user.get());
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -58,7 +70,7 @@ public class ReportService extends ReportServiceSuper {
         return report;
     }
 
-    public String getHtmlContentIndex(String userName) throws IOException {
+    public String getHtmlContentIndex(String userName, Optional<User> user,ReportVO saveRequest) throws IOException {
         StringBuilder html = new StringBuilder();
 
         html.append("<!DOCTYPE html>\n");
@@ -149,21 +161,19 @@ public class ReportService extends ReportServiceSuper {
         // 따옴표 이스케이프 처리에 유의
         html.append("            <iframe id='content' src=\"\" width=\"100%\" height=\"100%\"></iframe>\n");
         html.append("        </main>\n");
-        for (Report reportAll : reportRepository.findAll()) {
+
             html.append("        <aside>\n");
             html.append("            <div>\n");
-            html.append("                <p>").append(reportAll.getYear()).append(".").append(reportAll.getMonth()).append("</p>\n");
             html.append("                <div>\n");
-            html.append("                    <a class=\"report\" id=\"").append(reportAll.getId()).append("\">").append(reportAll.getUserBook().getBook().getAuthor()).append(" / ").append(reportAll.getReportTitle()).append("</a>\n");
-            html.append("                </div>\n");
-            html.append("                <div>\n");
-            html.append("                    <a  class=\"report\" id=\"03\">박웅현     / 여덟단어 </a>\n");
+            for (UserBook userBook : userBookService.getUserBooksByUserOpen(user)) {
+                html.append("                    <a class=\"report\" id=\"").append(userBook.getId()).append("\">").append(userBook.getBook().getAuthor()).append(" / ").append(userBook.getBook().getTitle()).append("<br><br><br>").append("</a>\n");
+            }
             html.append("                </div>\n");
             html.append("            </div>\n");
             html.append("        </aside>\n");
             html.append("    </div>\n");
             html.append("\n");
-        }
+
         html.append("    <footer>\n");
         html.append("        <p>&copy; 2025 모든 권리 보유.</p>\n");
         html.append("        <p>서홍익 개인 공간.</p>\n");
@@ -173,14 +183,19 @@ public class ReportService extends ReportServiceSuper {
         html.append("<script>\n");
         // Java 문자열 내의 스크립트 코드는 그대로 유지
 
-        for (Report reportAll : reportRepository.findAll()) {
-            html.append("    document.querySelectorAll(\".report\").forEach(function(item,index){\n");
-            html.append("        item.addEventListener(\"click\",function(){\n");
-            html.append("            document.querySelector(\"#content\").src = '/report/").append(reportAll.getYear()).append("/'+(item.id)+\".html\";\n");
-            html.append("            \n");
-            html.append("        })\n");
-            html.append("    });\n");
+        Set<String> yearSet = new HashSet<>();
+        for (Report report : reportRepository.findAllByUserOrderByCreatedAt(user.get())) {
+            yearSet.add(report.getYear());
         }
+        html.append("    document.querySelectorAll(\".report\").forEach(function(item,index){\n");
+        html.append("        item.addEventListener(\"click\",function(){\n");
+        for (String year : yearSet) {
+            html.append("            document.querySelector(\"#content\").src = '../").append(year).append("/'+(item.id)+\".html\";\n");
+        }
+        html.append("            \n");
+        html.append("        })\n");
+        html.append("    });\n");
+
         html.append("</script>\n");
         html.append("</html>\n");
 
@@ -193,7 +208,7 @@ public class ReportService extends ReportServiceSuper {
         return html.toString();
     }
 
-    public void getHtmlDetail(Report report,String userName) throws IOException {
+    public void getHtmlDetail(ReportVO report,String userName,User user) throws IOException {
         // 원본 HTML의 일부 (section 태그)
         // StringBuilder 객체를 생성합니다.
         StringBuilder htmlBuilder = new StringBuilder();
@@ -239,11 +254,11 @@ public class ReportService extends ReportServiceSuper {
                 .append("            <div class=\"flex flex-col items-center justify-center p-8 bg-gray-50 rounded-xl mb-12\">\n")
                 .append("                <h2 class=\"text-3xl font-bold text-gray-900 mb-6\">책 표지</h2>\n")
                 .append("                <img \n")
-                .append("                    src="+report.getUserBook().getBook().getCoverImageUrl()+"/")
+                .append("                    src="+report.getImageUrl()+"/")
                 .append("                    class=\"w-60 h-90 object-cover shadow-2xl rounded-lg transform transition duration-500 hover:scale-105\"\n")
                 .append("                    onerror=\"this.onerror=null; this.src='https://placehold.co/300x450/4b5563/e5e7eb?text=Image+Unavailable'\"\n")
                 .append("                />\n")
-                .append("                <p class=\"mt-4 text-sm text-gray-500\">"+ report.getUserBook().getBook().getTitle()+ "</p>\n")
+                .append("                <p class=\"mt-4 text-sm text-gray-500\">"+ report.getReportTitle()+ "</p>\n")
                 .append("            </div>\n");
 
         // 6. 첫 번째 <article> (내용 분석 및 감상) 시작
@@ -251,17 +266,21 @@ public class ReportService extends ReportServiceSuper {
                 .append("            <article class=\"border-t-2 border-gray-200 pt-8 mt-12\">\n")
                 .append("                <h3 class=\"text-2xl font-semibold text-gray-800 mb-4\">줄거리</h3>\n")
                 .append("                <p class=\"text-lg leading-relaxed text-gray-700\">\n")
-                .append("                  "+report.getUserBook().getBook().getDescription()+"\n")
+                .append("                  "+report.getDescription()+"\n")
                 .append("                </p>\n");
 
         // 7. 울림이 있는 한줄 (인용구) 블록 추가 (quoteHtml)
 
-        for (String sympathyLine : report.getSympathyLines()) {
-            htmlBuilder.append("                <!-- 추가된 '울림이 있는 한줄' -->\n")
-                    .append("                <blockquote class=\"mt-6 border-l-4 border-gray-300 pl-4 italic text-gray-600\">\n")
-                    .append("                 "+sympathyLine+"\n")
-                    .append("                </blockquote>\n");
-        }
+        htmlBuilder.append("                <!-- 추가된 '울림이 있는 한줄' -->\n")
+                    .append("                <p class=\"mt-6 border-l-4 border-gray-300 pl-4 italic text-gray-600\">\n")
+                    .append("                 "+report.getSympathyLine1()+"\n")
+                    .append("                </p>\n")
+                    .append("                <p class=\"mt-6 border-l-4 border-gray-300 pl-4 italic text-gray-600\">\n")
+                    .append("                 "+report.getSympathyLine2()+"\n")
+                    .append("                </p>\n")
+                    .append("                <p class=\"mt-6 border-l-4 border-gray-300 pl-4 italic text-gray-600\">\n")
+                    .append("                 "+report.getSympathyLine3()+"\n")
+                    .append("                </p>\n");
 
         // 8. 첫 번째 <article> 끝
         htmlBuilder.append("            </article> \n");
@@ -285,13 +304,21 @@ public class ReportService extends ReportServiceSuper {
         System.out.println("--- StringBuilder.append()로 완성된 HTML ---");
         System.out.println(htmlBuilder.toString());
 
+
         // 6. 결과 출력
-        File file = new File("/Users/"+userName+"/book-reporter/"+ report.getYear()+"/"+ report.getId()+".html");
-        if(file.exists()) {
-            if(file.delete()){
-                log.info("파일 업데이트");
-            }
+        File folder = new File("/Users/"+userName+"/book-reporter/"+ report.getYear());
+
+        //report.getId()+".html"
+
+        if(!folder.exists()){
+            folder.mkdirs();
         }else {
+            File file = new File(folder+"/"+report.getUserBookId()+".html");
+            if (file.exists()) {
+                if (file.delete()) {
+                    log.info("파일 업데이트");
+                }
+            }
             FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(htmlBuilder.toString());
             fileWriter.close();

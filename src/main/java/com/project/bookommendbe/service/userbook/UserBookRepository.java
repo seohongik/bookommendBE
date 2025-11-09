@@ -22,4 +22,7 @@ interface UserBookRepository extends JpaRepository<UserBook, Long> {
 
     boolean existsUserBookByUserAndBookIsbn(User userId, String bookIsbn);
 
+    List<UserBook> findUserBooksByUserId(Long userId);
+
+    UserBook findUserBookByIdAndUserId(Long id, Long userId);
 }

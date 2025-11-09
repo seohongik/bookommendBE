@@ -27,9 +27,15 @@ public class ReportVO {
 
     private String reportContent;
 
-    private List<String> sympathyLines;
+    private String sympathyLine1;
+    private String sympathyLine2;
+    private String sympathyLine3;
 
     private LocalDateTime reportDateTime;
 
     private LocalDateTime createdAt;
+
+    private String imageUrl;
+
+    private String description;
 }

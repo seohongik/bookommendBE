@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +30,7 @@ public class User {
     private String confirmPassword;
 
     private String fullName;
-    private String  dateOfBirth;
+    private String dateOfBirth;
 
     private String gender;
 
@@ -39,7 +40,7 @@ public class User {
     @Column(unique = true)
     private String phoneNumberTypical;
 
-    private LocalDate createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "user")
     private List<UserBook> userBook;
